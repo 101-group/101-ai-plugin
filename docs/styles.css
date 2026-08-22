@@ -58,7 +58,7 @@ a { color: inherit; }
 
 .hero-content {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(400px, 0.9fr);
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 0.72fr);
   gap: 72px;
   align-items: center;
   padding: 118px 0 104px;
@@ -135,7 +135,9 @@ h1 {
 
 .assistant-preview {
   position: relative;
-  min-height: 480px;
+  width: min(100%, 360px);
+  min-height: 570px;
+  justify-self: center;
   padding: 16px 20px 20px;
   overflow: hidden;
   color: #171717;
@@ -161,7 +163,7 @@ h1 {
 .preview-brand img { border-radius: 10px; }
 .preview-head button { width: 42px; height: 42px; padding: 0; color: #202020; background: #f5f5f3; border: 0; border-radius: 50%; font: inherit; }
 
-.chat-thread { position: relative; z-index: 2; margin-top: 18px; padding-bottom: 58px; }
+.chat-thread { position: relative; z-index: 2; margin-top: 26px; padding-bottom: 70px; }
 .message { font-size: .88rem; line-height: 1.4; }
 .user-message {
   max-width: 82%;
@@ -182,7 +184,7 @@ h1 {
 .mini-chart { margin-top: 8px; padding: 10px 11px 7px; background: #fff; border: 1px solid #e2e2de; border-radius: 12px; }
 .chart-head { display: flex; justify-content: space-between; color: #4e4e4a; font-size: .65rem; }
 .chart-head span:last-child { color: #999994; }
-.line-chart { position: relative; height: 76px; margin-top: 7px; overflow: hidden; }
+.line-chart { position: relative; height: 100px; margin-top: 7px; overflow: hidden; }
 .line-chart svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .chart-line { fill: none; stroke: #3b7ddd; stroke-linecap: round; stroke-width: 3; vector-effect: non-scaling-stroke; }
 .chart-area { fill: rgba(59,125,221,.08); }
@@ -286,7 +288,7 @@ footer a:focus-visible {
 @media (max-width: 760px) {
   .hero { min-height: auto; }
   .hero-content { grid-template-columns: 1fr; gap: 48px; padding: 84px 0 72px; }
-  .assistant-preview { min-height: 430px; border-radius: 26px; }
+  .assistant-preview { width: min(100%, 342px); min-height: 560px; border-radius: 32px; }
   .user-message { max-width: 88%; }
   .grid,
   .split,
