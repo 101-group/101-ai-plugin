@@ -254,6 +254,8 @@ h3 { font-size: 1.3rem; }
 .copy,
 .security > p { font-size: 1.15rem; }
 
+.security > p { padding-top: 112px; }
+
 .cta {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -299,6 +301,7 @@ footer a:focus-visible {
   .security { grid-template-columns: 1fr; }
   .split,
   .security { gap: 24px; }
+  .security > p { padding-top: 0; }
   .section { padding: 76px 0; }
   .cta { grid-template-columns: 1fr; }
   .cta .button { width: 100%; }
