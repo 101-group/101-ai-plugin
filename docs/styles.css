@@ -155,10 +155,6 @@ h1 {
 .signal b:nth-child(2) { height: 6px; }
 .signal b:nth-child(3) { height: 9px; }
 .signal b:nth-child(4) { height: 12px; }
-.wifi { color: #171717; font-size: 1rem; font-style: normal; line-height: 1; transform: rotate(-45deg); }
-.battery { position: relative; display: block; width: 20px; height: 10px; border: 1.5px solid #171717; border-radius: 3px; }
-.battery::before { position: absolute; inset: 1.5px 5px 1.5px 1.5px; background: #171717; border-radius: 1px; content: ""; }
-.battery::after { position: absolute; top: 2px; right: -3.5px; width: 2px; height: 4px; background: #171717; border-radius: 0 1px 1px 0; content: ""; }
 
 .preview-head,
 .preview-foot {
