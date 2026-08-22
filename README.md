@@ -1,23 +1,23 @@
 # 101 AI Plugin
 
-Public marketplace package for the 101 Codex plugin. It bundles workflow skills for company analytics, finance, CRM, estimates, events, reports, Wiki, and files, backed by the registered 101 MCP app.
+Публичный маркетплейс плагина 101 для Codex. Плагин содержит навыки для аналитики компании, финансов, CRM, смет, событий, отчётов, Wiki и файлов и работает через зарегистрированное приложение 101 MCP.
 
-## Install in Codex
+## Установка в Codex
 
-1. Open **Settings → Plugins → Add → Add plugin marketplace**.
-2. Set **Source** to `https://github.com/101-group/101-ai-plugin.git`.
-3. Set **Git ref** to `main`.
-4. Leave **Sparse paths** empty and add the marketplace.
-5. Enable the **101** plugin and complete the 101 OAuth connection.
+1. Откройте **Настройки → Плагины → Добавить → Добавить маркетплейс**.
+2. В поле **Источник** вставьте `https://github.com/101-group/101-ai-plugin.git`.
+3. В поле **Git ref** укажите `main`.
+4. Поле **Выборочные пути** оставьте пустым и добавьте маркетплейс.
+5. Включите плагин **101** и пройдите авторизацию в 101 через OAuth.
 
-## Claude compatibility
+## Совместимость с Claude
 
-The current package uses the Codex marketplace and `.codex-plugin` manifest format. The Git repository can be shared with other agent clients, but Claude requires its own supported plugin/skills manifest and installation flow. Do not treat this Codex package as directly installable in Claude until that compatibility layer is added and tested.
+Текущий пакет использует формат маркетплейса Codex и манифест `.codex-plugin`. Этот Git-репозиторий можно использовать как общий источник для разных AI-агентов, но Claude требуется собственный поддерживаемый манифест и отдельный способ установки. Не считайте текущий пакет напрямую совместимым с Claude, пока соответствующий слой совместимости не будет добавлен и протестирован.
 
-## Security
+## Безопасность
 
-The repository contains no credentials. Authentication and data permissions are enforced by the remote 101 MCP server through OAuth. Never commit access tokens, passwords, private keys, or local session data.
+Репозиторий не содержит паролей, токенов, API-ключей, приватных ключей или пользовательских сессий. Авторизация и права доступа к данным проверяются удалённым сервером 101 MCP через OAuth. Никогда не добавляйте в репозиторий секреты или локальные данные авторизации.
 
-## Version
+## Версия
 
-Current Codex plugin: `1.0.0+codex.20260822085356`.
+Текущая версия плагина для Codex: `1.0.0`.
