@@ -59,29 +59,38 @@
         </div>
 
         <div class="assistant-preview" aria-label="Пример финансового анализа 101 в ChatGPT">
+          <div class="phone-status" aria-hidden="true"><strong>9:41</strong><span>● ●●</span></div>
           <div class="preview-head">
-            <span class="preview-brand"><img src="101-logo.png" width="36" height="36" alt="">101 в ChatGPT</span>
-            <span class="status-dot">Подключено</span>
+            <button type="button" tabindex="-1" aria-hidden="true">☰</button>
+            <span class="preview-brand"><img src="101-logo.png" width="30" height="30" alt="">101</span>
+            <button type="button" tabindex="-1" aria-hidden="true">•••</button>
           </div>
 
           <div class="chat-thread">
             <div class="message user-message">Проанализируй мои проекты и покажи финансовую картину.</div>
             <div class="message assistant-message">
-              <div class="assistant-name"><img src="101-logo.png" width="24" height="24" alt="">101</div>
-              <p>Готово. Собрал P&amp;L и движение денежных средств по активным проектам.</p>
+              <p>Готово. Собрал ключевые показатели и динамику активных проектов.</p>
+              <h3>Финансовая аналитика проектов</h3>
+              <p class="analysis-description">P&amp;L и движение денежных средств за последние 12 месяцев.</p>
               <div class="metric-row">
                 <div><span>P&amp;L</span><strong>+18,4 млн</strong></div>
                 <div><span>ДДС</span><strong>+6,9 млн</strong></div>
               </div>
               <div class="mini-chart" aria-label="Динамика проектов">
                 <div class="chart-head"><span>Динамика проектов</span><span>12 месяцев</span></div>
-                <div class="bars" aria-hidden="true">
-                  <i style="--h:38%"></i><i style="--h:56%"></i><i style="--h:45%"></i><i style="--h:72%"></i><i style="--h:64%"></i><i style="--h:88%"></i><i style="--h:78%"></i><i style="--h:100%"></i>
+                <div class="line-chart" aria-hidden="true">
+                  <span class="grid-line line-one"></span><span class="grid-line line-two"></span><span class="grid-line line-three"></span>
+                  <svg viewBox="0 0 320 92" preserveAspectRatio="none">
+                    <path class="chart-area" d="M0 77 C35 62,46 21,82 42 S135 76,166 46 S214 20,243 44 S285 69,320 26 L320 92 L0 92 Z"></path>
+                    <path class="chart-line" d="M0 77 C35 62,46 21,82 42 S135 76,166 46 S214 20,243 44 S285 69,320 26"></path>
+                  </svg>
                 </div>
               </div>
               <span class="analysis-note">3 проекта требуют внимания</span>
             </div>
           </div>
+
+          <div class="chat-composer" aria-hidden="true"><span>＋</span><span>Спросить ChatGPT</span><b>●</b></div>
         </div>
       </div>
     </header>
