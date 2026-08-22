@@ -1,0 +1,48 @@
+{
+  "package": "@101app/design-tokens-web",
+  "version": "1.0.154",
+  "distIntegrity": "sha512-4l2VUJGVAlOo+yBTiI18nG1Y2+maabvItWhJ20cYqnlkLycH6YO5yyf+3lv8bXNjqQlcAShn++VhTWOs+sb64A==",
+  "designTokensSourceCommit": "3f8ddad945681b4bb9225e4d25d0e7a9fb9bcc98",
+  "tokensCssSha256": "6b420c2c49ff4030a3039cddb2b238fb6e242e96f17a0da569086c3c753f7270",
+  "semanticRoles": {
+    "expense": "--color-event-expense",
+    "income": "--color-event-income",
+    "markup": "--color-event-markup",
+    "profit": "--color-event-dividends",
+    "estimate": "--color-event-estimate",
+    "paymentOwn": "--color-event-payment-own",
+    "paymentWorking": "--color-event-payment-working",
+    "agentIncome": "--color-event-dividends",
+    "agentFee": "--color-event-agent-fee"
+  },
+  "movementRoles": {
+    "positive": "--color-amount-positive",
+    "negative": "--color-amount-negative"
+  },
+  "resolved": {
+    "light": {
+      "--color-event-expense": "#C4317A",
+      "--color-event-income": "#6E8D44",
+      "--color-event-markup": "#CC7F08",
+      "--color-event-dividends": "#2D9CCF",
+      "--color-event-estimate": "#6D43F6",
+      "--color-event-payment-own": "#A65959",
+      "--color-event-payment-working": "#C19810",
+      "--color-event-agent-fee": "#2B91A0",
+      "--color-amount-positive": "#00A530",
+      "--color-amount-negative": "#F40017"
+    },
+    "dark": {
+      "--color-event-expense": "#C4317A",
+      "--color-event-income": "#6E8D44",
+      "--color-event-markup": "#E58F09",
+      "--color-event-dividends": "#32ADE6",
+      "--color-event-estimate": "#6D43F6",
+      "--color-event-payment-own": "#A65959",
+      "--color-event-payment-working": "#C19810",
+      "--color-event-agent-fee": "#2B91A0",
+      "--color-amount-positive": "#00A530",
+      "--color-amount-negative": "#F40017"
+    }
+  }
+}
