@@ -192,7 +192,11 @@ h1 {
 .line-one { top: 20%; }.line-two { top: 50%; }.line-three { top: 80%; }
 .analysis-note { display: inline-block; margin-top: 7px; color: #777772; font-size: .68rem; }
 .chat-composer { position: absolute; right: 18px; bottom: 16px; left: 18px; z-index: 3; display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: center; padding: 10px 13px; color: #92928d; background: rgba(255,255,255,.94); border: 1px solid #deded9; border-radius: 999px; box-shadow: 0 8px 28px rgba(20,20,18,.1); backdrop-filter: blur(12px); }
-.chat-composer span:first-child { color: #222; font-size: 1.25rem; }.chat-composer b { color: #111; font-size: 1.2rem; }
+.chat-composer span:first-child { color: #222; font-size: 1.25rem; }
+.voice-wave { display: flex; width: 34px; height: 34px; align-items: center; justify-content: center; gap: 2px; background: #080808; border-radius: 50%; }
+.voice-wave i { display: block; width: 2px; height: 9px; background: #fff; border-radius: 2px; }
+.voice-wave i:nth-child(2), .voice-wave i:nth-child(4) { height: 14px; }
+.voice-wave i:nth-child(3) { height: 19px; }
 
 main,
 footer {
