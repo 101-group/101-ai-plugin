@@ -136,7 +136,8 @@ h1 {
 .assistant-preview {
   position: relative;
   width: min(100%, 360px);
-  min-height: 570px;
+  aspect-ratio: 9 / 19;
+  min-height: 0;
   justify-self: center;
   padding: 16px 20px 20px;
   overflow: hidden;
@@ -147,8 +148,17 @@ h1 {
   box-shadow: 0 30px 80px rgba(20, 20, 18, 0.16);
 }
 
-.phone-status { display: flex; justify-content: space-between; padding: 0 10px 8px; font-size: .72rem; }
-.phone-status span { letter-spacing: 2px; }
+.phone-status { display: flex; justify-content: space-between; align-items: center; padding: 0 10px 8px; font-size: .72rem; }
+.phone-indicators { display: flex; align-items: center; gap: 6px; }
+.signal { display: flex; height: 12px; align-items: end; gap: 1.5px; }
+.signal b { display: block; width: 2.5px; height: 4px; background: #171717; border-radius: 1px; }
+.signal b:nth-child(2) { height: 6px; }
+.signal b:nth-child(3) { height: 9px; }
+.signal b:nth-child(4) { height: 12px; }
+.wifi { color: #171717; font-size: 1rem; font-style: normal; line-height: 1; transform: rotate(-45deg); }
+.battery { position: relative; display: block; width: 20px; height: 10px; border: 1.5px solid #171717; border-radius: 3px; }
+.battery::before { position: absolute; inset: 1.5px 5px 1.5px 1.5px; background: #171717; border-radius: 1px; content: ""; }
+.battery::after { position: absolute; top: 2px; right: -3.5px; width: 2px; height: 4px; background: #171717; border-radius: 0 1px 1px 0; content: ""; }
 
 .preview-head,
 .preview-foot {
@@ -254,7 +264,8 @@ h3 { font-size: 1.3rem; }
 .copy,
 .security > p { font-size: 1.15rem; }
 
-.security > p { padding-top: 112px; }
+.split > .copy,
+.security > p { padding-top: 39px; }
 
 .cta {
   display: grid;
@@ -294,13 +305,14 @@ footer a:focus-visible {
 @media (max-width: 760px) {
   .hero { min-height: auto; }
   .hero-content { grid-template-columns: 1fr; gap: 48px; padding: 84px 0 72px; }
-  .assistant-preview { width: min(100%, 342px); min-height: 560px; border-radius: 32px; }
+  .assistant-preview { width: min(100%, 342px); min-height: 0; border-radius: 32px; }
   .user-message { max-width: 88%; }
   .grid,
   .split,
   .security { grid-template-columns: 1fr; }
   .split,
   .security { gap: 24px; }
+  .split > .copy,
   .security > p { padding-top: 0; }
   .section { padding: 76px 0; }
   .cta { grid-template-columns: 1fr; }
