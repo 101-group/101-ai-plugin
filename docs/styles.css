@@ -234,7 +234,7 @@ h3 { font-size: 1.3rem; }
 
 .card { transition: transform 180ms ease, box-shadow 180ms ease; }
 .card:hover { transform: translateY(-4px); box-shadow: 0 18px 46px rgba(20,20,18,.07); }
-.card-number { display: block; margin-bottom: 54px; color: #999991; font-size: .78rem; font-weight: 700; letter-spacing: .12em; }
+.card-number { display: block; margin-bottom: 34px; color: #d1d1cc; font-size: clamp(3.6rem, 6vw, 5.6rem); font-weight: 650; line-height: .85; letter-spacing: -.07em; }
 
 .card p,
 .copy,
