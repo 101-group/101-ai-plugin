@@ -1,0 +1,31 @@
+{
+  "name": "101-chatgpt-data-analytics",
+  "releaseId": "8f2e0a97249ecd08542a66accf849e3c2d14f524be2f73761a2e441dd091511b",
+  "resources": [
+    {
+      "bytes": 2503725,
+      "file": "chart-v2.html",
+      "gzipBytes": 597112,
+      "mediaType": "text/html;profile=mcp-app",
+      "sha256": "5ac58ed1078555a1601a7cf9dd1c61d569753864b71c572cf3121c8f92940e2f",
+      "uri": "ui://101/analytics/chart-v2.html"
+    },
+    {
+      "bytes": 1665749,
+      "file": "report-v2.html",
+      "gzipBytes": 540477,
+      "mediaType": "text/html;profile=mcp-app",
+      "sha256": "4484e566d9dd59ed6beff27273aa26018829e9caa5a68b19fbe8273176d1f481",
+      "uri": "ui://101/analytics/report-v2.html"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceCommit": "d4bd40ed0d75df5a6015106f03e35cfb16c3b494",
+  "upstream": {
+    "commit": "fe5608d2512a7d6a7b9821ce8a88c48464ecd6e4",
+    "package": "datascience-mcp-widgets",
+    "packageVersion": "0.2.6",
+    "repository": "https://github.com/openai/role-specific-plugins"
+  },
+  "version": "2.0.0"
+}
