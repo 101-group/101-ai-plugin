@@ -74,15 +74,6 @@ a { color: inherit; }
   text-transform: uppercase;
 }
 
-.eyebrow span {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  margin-right: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-}
-
 h1,
 h2,
 h3,
