@@ -64,7 +64,7 @@ class PluginManifestTest(unittest.TestCase):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
 
         self.assertEqual(manifest['name'], '101')
-        self.assertEqual(manifest['version'], '2.0.6')
+        self.assertEqual(manifest['version'], '2.0.7')
         self.assertEqual(manifest['mcpServers'], './.mcp.json')
         self.assertEqual(manifest['apps'], './.app.json')
         self.assertEqual(manifest['interface']['displayName'], '101')
@@ -79,8 +79,22 @@ class PluginManifestTest(unittest.TestCase):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
 
-        self.assertEqual(manifest['version'], '2.0.6')
-        self.assertIn('Текущая версия плагина для Codex: `2.0.6`.', readme)
+        self.assertEqual(manifest['version'], '2.0.7')
+        self.assertIn('Текущая версия плагина для Codex: `2.0.7`.', readme)
+
+    def test_task_management_skill_is_bundled_for_the_public_plugin(self):
+        skill = ROOT / 'plugins/101/skills/task-management/SKILL.md'
+        policy = ROOT / 'plugins/101/skills/task-management/agents/openai.yaml'
+
+        self.assertTrue(skill.is_file())
+        self.assertTrue(policy.is_file())
+        source = skill.read_text(encoding='utf-8')
+        self.assertIn('name: task-management', source)
+        self.assertIn('  - get_task', source)
+        self.assertIn('  - show_result', source)
+        self.assertIn('ui://101/widget/app-2.0.7.html', source)
+        self.assertIn('set_task_assignee', source)
+        self.assertIn('submit_task_comment', source)
 
     def test_bundled_analytics_runtime_matches_its_immutable_release_lock(self):
         widget_root = ROOT / 'plugins/101/widgets/analytics/v2'

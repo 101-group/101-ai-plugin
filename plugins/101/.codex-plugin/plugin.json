@@ -1,6 +1,6 @@
 {
   "name": "101",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Public workflow skills backed by the 101 MCP server.",
   "author": {
     "name": "101"
@@ -8,8 +8,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "101",
-    "shortDescription": "101 workflows and interactive company analytics.",
-    "longDescription": "Use the 101 dispatcher and internal workflow skills for finance, company analytics, events, Wiki and files through the public 101 MCP connection.",
+    "shortDescription": "101 workflows, tasks and interactive analytics.",
+    "longDescription": "Use the 101 dispatcher and internal workflow skills for tasks, finance, company analytics, events, Wiki and files through the public 101 MCP connection.",
     "logo": "./assets/MCP_logo.png",
     "composerIcon": "./assets/MCP_logo.png",
     "developerName": "101",

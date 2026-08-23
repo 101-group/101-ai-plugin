@@ -49,7 +49,7 @@
       ],
       "widget": {
         "kind": "projects",
-        "resourceUri": "ui://101/widget/app-v1.html"
+        "resourceUri": "ui://101/widget/app-2.0.7.html"
       }
     },
     {
@@ -64,7 +64,22 @@
       ],
       "widget": {
         "kind": "events",
-        "resourceUri": "ui://101/widget/app-v1.html"
+        "resourceUri": "ui://101/widget/app-2.0.7.html"
+      }
+    },
+    {
+      "id": "task_detail",
+      "examples": [
+        "открой задачу",
+        "покажи детали задачи"
+      ],
+      "tools": [
+        "get_task",
+        "show_result"
+      ],
+      "widget": {
+        "kind": "task_detail",
+        "resourceUri": "ui://101/widget/app-2.0.7.html"
       }
     },
     {
