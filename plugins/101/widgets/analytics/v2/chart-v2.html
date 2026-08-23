@@ -78,6 +78,16 @@ var SOURCE_KEYS = new Set([
 	"filters",
 	"metrics"
 ]);
+var NORMALIZED_SOURCE_KEYS = new Set([
+	"kind",
+	"engine",
+	"label",
+	"tool",
+	"executedAt",
+	"description",
+	"filters",
+	"metricDefinitions"
+]);
 var IDENTIFIER = /^[a-z][a-z0-9_]{0,63}$/;
 var FILTER_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_]{0,63}$/;
 var UUID = /\b[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}\b/i;
@@ -133,6 +143,34 @@ function normalizeMetrics(value) {
 		return `${safeIdentifier(metric.id, `source.metrics.${index}.id`)}: ${safeText(metric.definition, `source.metrics.${index}.definition`, 300)}`;
 	});
 }
+function normalizeTextList(value, path) {
+	if (value == null) return void 0;
+	if (!Array.isArray(value) || value.length > 20) fail(path, "invalid or unbounded");
+	return value.map((item, index) => safeText(item, `${path}.${index}`, 500));
+}
+function normalizeUpstream101Source(value) {
+	const source = record(value, "source");
+	const extraKey = Object.keys(source).find((key) => !NORMALIZED_SOURCE_KEYS.has(key));
+	if (extraKey) fail(`source.${extraKey}`, "not allowed");
+	if (source.kind !== "mcp") fail("source.kind", "invalid");
+	if (source.engine !== "101-mcp") fail("source.engine", "invalid");
+	const tool = safeIdentifier(source.tool, "source.tool");
+	if (source.label !== `101 · ${tool}`) fail("source.label", "invalid");
+	const executedAt = safeText(source.executedAt, "source.executedAt", 40);
+	if (Number.isNaN(Date.parse(executedAt)) || !/(?:Z|[+-]\d{2}:\d{2})$/.test(executedAt)) fail("source.executedAt", "invalid");
+	const filters = normalizeTextList(source.filters, "source.filters");
+	const metricDefinitions = normalizeTextList(source.metricDefinitions, "source.metricDefinitions");
+	return {
+		kind: "mcp",
+		engine: "101-mcp",
+		label: `101 · ${tool}`,
+		tool,
+		executedAt,
+		description: safeText(source.description, "source.description", 500),
+		...filters?.length ? { filters } : {},
+		...metricDefinitions?.length ? { metricDefinitions } : {}
+	};
+}
 function normalize101Source(value) {
 	const source = record(value, "source");
 	const extraKey = Object.keys(source).find((key) => !SOURCE_KEYS.has(key));
@@ -162,6 +200,7 @@ function isRecord(value) {
 }
 function adaptSource(value) {
 	if (!isRecord(value) || value.engine !== "101-mcp") return value;
+	if (value.kind === "mcp") return normalizeUpstream101Source(value);
 	return normalize101Source(value);
 }
 function assertCurrencyNeutralRecord(value, path) {
@@ -387,6 +426,9 @@ function adaptMessage(value) {
 	if (record.toolOutput) adapt101AnalyticsPayloadInPlace(record.toolOutput);
 	adapt101AnalyticsPayloadInPlace(value);
 }
+function applyAnalyticsTheme(element, value) {
+	if (value === "light" || value === "dark") element.dataset.theme = value;
+}
 function createMemoryKeyValueStorage() {
 	const values = /* @__PURE__ */ new Map();
 	return {
@@ -470,6 +512,7 @@ function install101AnalyticsBridge() {
 	if (typeof window === "undefined") return;
 	const host = window.openai ?? (window.openai = {});
 	applyAnalyticsLocale(document.documentElement, host.hostContext?.locale);
+	applyAnalyticsTheme(document.documentElement, host.hostContext?.theme ?? host.theme);
 	installPlaygroundStateCompatibility(host);
 	adaptMessage(host.toolOutput);
 	window.addEventListener("message", (event) => adaptMessage(event.data), { capture: true });
@@ -479,7 +522,10 @@ function install101AnalyticsBridge() {
 	window.addEventListener("openai:set_globals", (event) => {
 		const globals = event.detail?.globals;
 		adaptMessage(globals?.toolOutput);
-		if (globals && Object.hasOwn(globals, "hostContext")) applyAnalyticsLocale(document.documentElement, globals.hostContext?.locale);
+		if (globals && Object.hasOwn(globals, "hostContext")) {
+			applyAnalyticsLocale(document.documentElement, globals.hostContext?.locale);
+			applyAnalyticsTheme(document.documentElement, globals.hostContext?.theme);
+		}
 	});
 	const originalPayload = host.toolOutput;
 	const safePayload = originalPayload && typeof originalPayload === "object" && !Array.isArray(originalPayload) ? originalPayload : {};
