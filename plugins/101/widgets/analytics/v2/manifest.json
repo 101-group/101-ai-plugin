@@ -1,26 +1,26 @@
 {
   "name": "101-chatgpt-data-analytics",
-  "releaseId": "c447db1508a20f1754ea347f0be86de6081c4f86fa8acb8a7aeab76b0141a130",
+  "releaseId": "4cb582b0b836f8af15dbf2cc3ebac684d7cdb9dea7bd8378249d1eccd426acf9",
   "resources": [
     {
-      "bytes": 2505614,
+      "bytes": 2547824,
       "file": "chart-v2.html",
-      "gzipBytes": 597314,
+      "gzipBytes": 600509,
       "mediaType": "text/html;profile=mcp-app",
-      "sha256": "9be323d8b3d30601e8fa9aec463d12f0c065c481be14305f18aee7f6e2a5f1f7",
+      "sha256": "a3db517527ba3b9030117a0d0ff9982a0691e605b8ccebefacef6d81d7015927",
       "uri": "ui://101/analytics/chart-v2.html"
     },
     {
-      "bytes": 1667078,
+      "bytes": 1699834,
       "file": "report-v2.html",
-      "gzipBytes": 540633,
+      "gzipBytes": 543033,
       "mediaType": "text/html;profile=mcp-app",
-      "sha256": "a00546cebf6a44ede53f696583cb83fb45bfd8f8e78c84837c84e220424d8cfb",
+      "sha256": "dec3f0a4c3a08bfc67c18ed3c2ef42af49d96f8a2a5139da94e39cd4c5fc745a",
       "uri": "ui://101/analytics/report-v2.html"
     }
   ],
   "schemaVersion": 1,
-  "sourceCommit": "eda7eb007001aa3d7f2b025743bb836b1031d8d9",
+  "sourceCommit": "e8aa60b5555a72dc4beec58f53277bfcc1e97d99",
   "upstream": {
     "commit": "fe5608d2512a7d6a7b9821ce8a88c48464ecd6e4",
     "package": "datascience-mcp-widgets",
