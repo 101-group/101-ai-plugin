@@ -79,8 +79,8 @@ class PluginManifestTest(unittest.TestCase):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
 
-        self.assertEqual(manifest['version'], '2.0.5')
-        self.assertIn('Текущая версия плагина для Codex: `2.0.5`.', readme)
+        self.assertEqual(manifest['version'], '2.0.6')
+        self.assertIn('Текущая версия плагина для Codex: `2.0.6`.', readme)
 
     def test_bundled_analytics_runtime_matches_its_immutable_release_lock(self):
         widget_root = ROOT / 'plugins/101/widgets/analytics/v2'
