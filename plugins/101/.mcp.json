@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "101": {
+      "type": "http",
+      "url": "https://app.101-group.ru/mcp",
+      "oauth_resource": "https://app.101-group.ru/mcp"
+    }
+  }
+}
