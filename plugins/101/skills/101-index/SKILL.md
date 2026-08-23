@@ -1,7 +1,7 @@
 ---
 name: 101-index
 description: Use when the user asks to read or change data in 101; routes every 101 goal to one available primary workflow while preserving the current chat context.
-version: "1.2.0"
+version: "1.3.0"
 role: index
 invocation: automatic
 intents:
@@ -23,6 +23,9 @@ resources:
     kind: semantic-guide
     required: true
   - path: references/presentation-routing.json
+    kind: routing-contract
+    required: true
+  - path: references/companion-routing.json
     kind: routing-contract
     required: true
 completion:
@@ -61,6 +64,15 @@ completion:
 Не загружай инструкции по дизайну графиков заранее: они принадлежат `analytics-visualization` и нужны только после положительного визуального намерения.
 
 CRM-намерения передавай внутреннему `crm-management`: только он выбирает конкретный CRM-инструмент, собирает точный REST payload (набор полей запроса) и ведёт сценарии воронок, этапов, сделок и распределения. Не задавай доменные CRM-вопросы до чтения этого скилла.
+
+## Сопутствующие плагины
+
+Прочитай `references/companion-routing.json`, когда запрос объединяет данные 101 с PDF или расширенной коммерческой задачей. Это контракт маршрутизации, а не разрешение копировать внешние skills или приложения внутрь 101.
+
+- Точное чтение, создание и изменение CRM-данных внутри 101 оставляй у `crm-management`.
+- При явном запросе прочитать, создать, отрендерить или проверить PDF сначала заверши активную подцель получения данных из 101, затем передай подтверждённый результат отдельному skill `pdf`. Создание PDF само по себе не разрешает запись в 101.
+- Подготовку к клиентской встрече, seller или leadership dashboard, pipeline, deal strategy, forecast, sales coaching, business case и customer deck передавай внешнему `sales:index`. Не подменяй эти workflows внутренним CRM CRUD и не подключай заранее приложения Sales.
+- Если `pdf` или `sales:index` недоступен, сохрани уже полученный результат 101 и предложи включить соответствующий отдельный plugin. Не считай отсутствие сопутствующего plugin ошибкой установки или подключения 101.
 
 ## Составные запросы и запись
 

@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "routes": [
+    {
+      "id": "crm_crud",
+      "owner": "crm-management",
+      "required": true,
+      "actions": [
+        "list",
+        "read",
+        "create",
+        "edit"
+      ],
+      "scope": "101_crm_data"
+    },
+    {
+      "id": "pdf_output",
+      "owner": "pdf",
+      "required": false,
+      "after": "101_data_subgoal",
+      "intents": [
+        "read_pdf",
+        "create_pdf",
+        "render_pdf",
+        "verify_pdf"
+      ],
+      "fallback": "preserve_101_result"
+    },
+    {
+      "id": "extended_sales",
+      "owner": "sales:index",
+      "required": false,
+      "intents": [
+        "customer_meeting",
+        "seller_dashboard",
+        "leadership_dashboard",
+        "pipeline",
+        "deal_strategy",
+        "forecast",
+        "sales_coaching",
+        "business_case",
+        "customer_deck"
+      ],
+      "fallback": "preserve_101_result"
+    }
+  ]
+}
