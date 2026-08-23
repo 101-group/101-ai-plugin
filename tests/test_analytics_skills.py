@@ -246,7 +246,7 @@ class PresentationRoutingContractTest(unittest.TestCase):
         self.assertIn('выведи список проектов', route['examples'])
         self.assertEqual(route['tools'], ['list_projects', 'show_result'])
         self.assertEqual(route['widget']['kind'], 'projects')
-        self.assertEqual(route['widget']['resourceUri'], 'ui://101/widget/app-v1.html')
+        self.assertEqual(route['widget']['resourceUri'], 'ui://101/widget/app-2.0.7.html')
 
     def test_index_requires_the_routing_contract_and_show_result(self):
         index = (SKILLS / '101-index/SKILL.md').read_text(encoding='utf-8')
@@ -306,7 +306,18 @@ class PresentationRoutingContractTest(unittest.TestCase):
         self.assertIn('выведи список событий', route['examples'])
         self.assertEqual(route['tools'], ['list_events', 'show_result'])
         self.assertEqual(route['widget']['kind'], 'events')
-        self.assertEqual(route['widget']['resourceUri'], 'ui://101/widget/app-v1.html')
+        self.assertEqual(route['widget']['resourceUri'], 'ui://101/widget/app-2.0.7.html')
+
+    def test_task_detail_routes_to_the_shared_application_widget(self):
+        route = self.routes['task_detail']
+
+        self.assertIn('открой задачу', route['examples'])
+        self.assertEqual(route['tools'], ['get_task', 'show_result'])
+        self.assertEqual(route['widget']['kind'], 'task_detail')
+        self.assertEqual(
+            route['widget']['resourceUri'],
+            'ui://101/widget/app-2.0.7.html',
+        )
 
     def test_analytics_routes_are_visual_but_scalar_reads_are_text_only(self):
         chart = self.routes['bounded_comparison_or_trend']
