@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "errors": {
+    "insufficient_tokens": {
+      "code": "insufficient_tokens",
+      "urlField": "topUpUrl",
+      "urlSource": "server_result_only",
+      "primaryAction": "open_in_app_browser",
+      "fallbackAction": "show_clickable_link",
+      "retry": "after_top_up_only",
+      "freeTools": "remain_available"
+    }
+  }
+}

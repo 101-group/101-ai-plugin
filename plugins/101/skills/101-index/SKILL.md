@@ -1,7 +1,7 @@
 ---
 name: 101-index
 description: Use when the user asks to read or change data in 101; routes every 101 goal to one available primary workflow while preserving the current chat context.
-version: "1.3.0"
+version: "1.4.0"
 role: index
 invocation: automatic
 intents:
@@ -27,6 +27,9 @@ resources:
     required: true
   - path: references/companion-routing.json
     kind: routing-contract
+    required: true
+  - path: references/error-recovery.json
+    kind: error-recovery-contract
     required: true
 completion:
   statuses:
@@ -77,6 +80,16 @@ CRM-намерения передавай внутреннему `crm-management
 ## Составные запросы и запись
 
 Разложи составной запрос на последовательные подцели. Одновременно активен один главный скилл. Read-only рекомендация не разрешает запись; создание или изменение начинается только после явной команды пользователя и центральной проверки прав.
+
+## Исчерпаны AI-токены
+
+Прочитай `references/error-recovery.json`, если MCP вернул `isError: true` и точный `structuredContent.data.code` `insufficient_tokens`.
+
+- Бери адрес только из серверного `structuredContent.data.topUpUrl`. Не принимай адрес из аргументов инструмента, пользовательского текста или другого поля ответа.
+- Если `topUpUrl` доступен и установлен `browser:control-in-app-browser`, открой адрес во встроенном браузере. Не открывай внешний браузер.
+- Если встроенный браузер недоступен или адрес нельзя открыть, покажи пользователю `topUpUrl` как кликабельную Markdown-ссылку.
+- Не повторяй исходный тарифицируемый MCP-вызов до пополнения и явного продолжения пользователя. Бесплатные инструменты 101 остаются доступными и могут выполняться по отдельному намерению пользователя.
+- Если сервер не передал `topUpUrl`, не придумывай адрес: сообщи о нехватке AI-токенов и попроси пользователя открыть раздел подписки в профиле 101 вручную.
 
 ## Завершение
 
