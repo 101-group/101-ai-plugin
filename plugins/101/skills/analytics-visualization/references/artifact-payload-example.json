@@ -1,0 +1,270 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Финансовый аудит компании",
+    "description": "Проверенный финансовый срез по данным 101",
+    "generatedAt": "2026-08-23T09:00:00Z",
+    "blocks": [
+      {
+        "id": "summary",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Вывод\n\nПоступления превышают расходы, но часть проектов требует внимания."
+      },
+      {
+        "id": "metrics",
+        "type": "metric-strip",
+        "layout": "full",
+        "cardIds": [
+          "income",
+          "expense",
+          "net"
+        ]
+      },
+      {
+        "id": "income_expense_block",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "income_expense"
+      },
+      {
+        "id": "net_flow_block",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "net_flow"
+      },
+      {
+        "id": "project_balance_block",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "project_balance"
+      },
+      {
+        "id": "monthly_table_block",
+        "type": "table",
+        "layout": "full",
+        "tableId": "monthly_table"
+      }
+    ],
+    "cards": [
+      {
+        "id": "income",
+        "dataset": "totals",
+        "metrics": [
+          {
+            "label": "Поступления",
+            "field": "income",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "expense",
+        "dataset": "totals",
+        "metrics": [
+          {
+            "label": "Расходы",
+            "field": "expense",
+            "format": "number"
+          }
+        ]
+      },
+      {
+        "id": "net",
+        "dataset": "totals",
+        "metrics": [
+          {
+            "label": "Разница",
+            "field": "net",
+            "format": "number",
+            "signed": true
+          }
+        ]
+      }
+    ],
+    "charts": [
+      {
+        "id": "income_expense",
+        "title": "Поступления и расходы по месяцам",
+        "type": "line",
+        "dataset": "monthly",
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "temporal"
+          },
+          "y": {
+            "fields": [
+              "income",
+              "expense"
+            ],
+            "type": "quantitative"
+          }
+        },
+        "valueFormat": "number",
+        "layout": "full"
+      },
+      {
+        "id": "net_flow",
+        "title": "Чистый денежный поток по месяцам",
+        "type": "bar",
+        "dataset": "monthly",
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "temporal"
+          },
+          "y": {
+            "field": "net",
+            "type": "quantitative"
+          }
+        },
+        "valueFormat": "number",
+        "layout": "full"
+      },
+      {
+        "id": "project_balance",
+        "title": "Баланс проектов",
+        "type": "horizontalBar",
+        "dataset": "projects",
+        "encodings": {
+          "x": {
+            "field": "project",
+            "type": "nominal"
+          },
+          "y": {
+            "field": "balance",
+            "type": "quantitative"
+          }
+        },
+        "valueFormat": "number",
+        "layout": "full"
+      }
+    ],
+    "tables": [
+      {
+        "id": "monthly_table",
+        "title": "Детализация по месяцам",
+        "dataset": "monthly",
+        "defaultSort": {
+          "field": "month",
+          "direction": "asc"
+        },
+        "columns": [
+          {
+            "field": "month",
+            "label": "Период",
+            "type": "date"
+          },
+          {
+            "field": "income",
+            "label": "Поступления",
+            "format": "number"
+          },
+          {
+            "field": "expense",
+            "label": "Расходы",
+            "format": "number"
+          },
+          {
+            "field": "net",
+            "label": "Разница",
+            "format": "number",
+            "movement": true
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "engine": "101-mcp",
+        "language": "mcp",
+        "tool": "list_events",
+        "executedAt": "2026-08-23T09:00:00Z",
+        "description": "Подтвержденные поступления и расходы по месяцам",
+        "filters": {
+          "dateFrom": "2026-06-01",
+          "dateTo": "2026-08-31",
+          "status": "partner_verified,client_accepted",
+          "withTotals": true
+        },
+        "metrics": [
+          {
+            "id": "income",
+            "definition": "Сумма подтвержденных поступлений"
+          },
+          {
+            "id": "expense",
+            "definition": "Сумма подтвержденных расходов"
+          }
+        ]
+      },
+      {
+        "engine": "101-mcp",
+        "language": "mcp",
+        "tool": "list_projects",
+        "executedAt": "2026-08-23T09:00:00Z",
+        "description": "Балансы активных проектов",
+        "filters": {
+          "status": "active"
+        },
+        "metrics": [
+          {
+            "id": "balance",
+            "definition": "Текущий баланс проекта"
+          }
+        ]
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-08-23T09:00:00Z",
+    "status": "ready",
+    "datasets": {
+      "monthly": [
+        {
+          "month": "2026-06-01",
+          "income": 1200000,
+          "expense": 900000,
+          "net": 300000
+        },
+        {
+          "month": "2026-07-01",
+          "income": 1500000,
+          "expense": 1100000,
+          "net": 400000
+        },
+        {
+          "month": "2026-08-01",
+          "income": 1350000,
+          "expense": 1250000,
+          "net": 100000
+        }
+      ],
+      "projects": [
+        {
+          "project": "Проект Север",
+          "balance": 450000
+        },
+        {
+          "project": "Проект Юг",
+          "balance": -180000
+        },
+        {
+          "project": "Проект Центр",
+          "balance": 90000
+        }
+      ],
+      "totals": [
+        {
+          "income": 4050000,
+          "expense": 3250000,
+          "net": 800000
+        }
+      ]
+    }
+  }
+}

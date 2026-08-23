@@ -38,8 +38,8 @@ class PluginManifestTest(unittest.TestCase):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
 
-        self.assertEqual(manifest['version'], '2.0.2')
-        self.assertIn('Текущая версия плагина для Codex: `2.0.2`.', readme)
+        self.assertEqual(manifest['version'], '2.0.3')
+        self.assertIn('Текущая версия плагина для Codex: `2.0.3`.', readme)
 
 
 if __name__ == '__main__':
