@@ -1,7 +1,7 @@
 {
   "name": "101",
-  "version": "2.0.5",
-  "description": "Private workflow skills backed by the 101 MCP server.",
+  "version": "2.0.6",
+  "description": "Public workflow skills backed by the 101 MCP server.",
   "author": {
     "name": "101"
   },
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "101",
     "shortDescription": "101 workflows and interactive company analytics.",
-    "longDescription": "Use the 101 dispatcher and internal workflow skills for finance, company analytics, events, Wiki and files with the registered private 101 MCP server.",
+    "longDescription": "Use the 101 dispatcher and internal workflow skills for finance, company analytics, events, Wiki and files through the public 101 MCP connection.",
     "logo": "./assets/MCP_logo.png",
     "composerIcon": "./assets/MCP_logo.png",
     "developerName": "101",
@@ -21,10 +21,9 @@
     "defaultPrompt": [
       "\u041f\u0440\u043e\u0432\u0435\u0434\u0438 \u0430\u0443\u0434\u0438\u0442 \u0444\u0438\u043d\u0430\u043d\u0441\u043e\u0432\u043e\u0433\u043e \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u044f.",
       "\u0421\u0434\u0435\u043b\u0430\u0439 \u0430\u043d\u0430\u043b\u0438\u0442\u0438\u043a\u0443 \u043a\u043e\u043c\u043f\u0430\u043d\u0438\u0438 \u0438 \u043f\u043e\u043a\u0430\u0436\u0438 \u0438\u043d\u0442\u0435\u0440\u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u0433\u0440\u0430\u0444\u0438\u043a\u0438.",
-      "\u041f\u043e\u043c\u043e\u0433\u0438 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044c\u0441\u044f \u0441 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u043c \u043f\u0440\u043e\u0435\u043a\u0442\u0430.",
-      "\u0421\u043e\u0437\u0434\u0430\u0439 \u043e\u0442\u0447\u0451\u0442\u044b \u0438 \u0441\u043c\u0435\u0442\u044b \u0441 \u043f\u043e\u0437\u0438\u0446\u0438\u044f\u043c\u0438 \u0438 \u0441\u0440\u043e\u043a\u0430\u043c\u0438.",
-      "\u041e\u0431\u043d\u043e\u0432\u0438 Wiki \u0438 \u0434\u043e\u0431\u0430\u0432\u044c \u0444\u0430\u0439\u043b\u044b \u043d\u0430 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0443."
+      "\u041f\u043e\u043c\u043e\u0433\u0438 \u0440\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044c\u0441\u044f \u0441 \u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u043e\u043c \u043f\u0440\u043e\u0435\u043a\u0442\u0430."
     ]
   },
+  "mcpServers": "./.mcp.json",
   "apps": "./.app.json"
 }

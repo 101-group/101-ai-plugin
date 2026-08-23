@@ -60,6 +60,21 @@ class PluginManifestTest(unittest.TestCase):
             },
         )
 
+    def test_public_plugin_manifest_exposes_release_components(self):
+        manifest = read_json('plugins/101/.codex-plugin/plugin.json')
+
+        self.assertEqual(manifest['name'], '101')
+        self.assertEqual(manifest['version'], '2.0.6')
+        self.assertEqual(manifest['mcpServers'], './.mcp.json')
+        self.assertEqual(manifest['apps'], './.app.json')
+        self.assertEqual(manifest['interface']['displayName'], '101')
+        self.assertLessEqual(len(manifest['interface']['defaultPrompt']), 3)
+        self.assertNotIn('private', manifest['description'].lower())
+        self.assertNotIn(
+            'private',
+            manifest['interface']['longDescription'].lower(),
+        )
+
     def test_patch_release_is_declared_consistently(self):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
