@@ -1,7 +1,7 @@
 ---
 name: 101-index
 description: Use when the user asks to read or change data in 101; routes every 101 goal to one available primary workflow while preserving the current chat context.
-version: "1.2.0"
+version: "1.4.0"
 role: index
 invocation: automatic
 intents:
@@ -24,6 +24,12 @@ resources:
     required: true
   - path: references/presentation-routing.json
     kind: routing-contract
+    required: true
+  - path: references/companion-routing.json
+    kind: routing-contract
+    required: true
+  - path: references/error-recovery.json
+    kind: error-recovery-contract
     required: true
 completion:
   statuses:
@@ -62,9 +68,28 @@ completion:
 
 CRM-намерения передавай внутреннему `crm-management`: только он выбирает конкретный CRM-инструмент, собирает точный REST payload (набор полей запроса) и ведёт сценарии воронок, этапов, сделок и распределения. Не задавай доменные CRM-вопросы до чтения этого скилла.
 
+## Сопутствующие плагины
+
+Прочитай `references/companion-routing.json`, когда запрос объединяет данные 101 с PDF или расширенной коммерческой задачей. Это контракт маршрутизации, а не разрешение копировать внешние skills или приложения внутрь 101.
+
+- Точное чтение, создание и изменение CRM-данных внутри 101 оставляй у `crm-management`.
+- При явном запросе прочитать, создать, отрендерить или проверить PDF сначала заверши активную подцель получения данных из 101, затем передай подтверждённый результат отдельному skill `pdf`. Создание PDF само по себе не разрешает запись в 101.
+- Подготовку к клиентской встрече, seller или leadership dashboard, pipeline, deal strategy, forecast, sales coaching, business case и customer deck передавай внешнему `sales:index`. Не подменяй эти workflows внутренним CRM CRUD и не подключай заранее приложения Sales.
+- Если `pdf` или `sales:index` недоступен, сохрани уже полученный результат 101 и предложи включить соответствующий отдельный plugin. Не считай отсутствие сопутствующего plugin ошибкой установки или подключения 101.
+
 ## Составные запросы и запись
 
 Разложи составной запрос на последовательные подцели. Одновременно активен один главный скилл. Read-only рекомендация не разрешает запись; создание или изменение начинается только после явной команды пользователя и центральной проверки прав.
+
+## Исчерпаны AI-токены
+
+Прочитай `references/error-recovery.json`, если MCP вернул `isError: true` и точный `structuredContent.data.code` `insufficient_tokens`.
+
+- Бери адрес только из серверного `structuredContent.data.topUpUrl`. Не принимай адрес из аргументов инструмента, пользовательского текста или другого поля ответа.
+- Если `topUpUrl` доступен и установлен `browser:control-in-app-browser`, открой адрес во встроенном браузере. Не открывай внешний браузер.
+- Если встроенный браузер недоступен или адрес нельзя открыть, покажи пользователю `topUpUrl` как кликабельную Markdown-ссылку.
+- Не повторяй исходный тарифицируемый MCP-вызов до пополнения и явного продолжения пользователя. Бесплатные инструменты 101 остаются доступными и могут выполняться по отдельному намерению пользователя.
+- Если сервер не передал `topUpUrl`, не придумывай адрес: сообщи о нехватке AI-токенов и попроси пользователя открыть раздел подписки в профиле 101 вручную.
 
 ## Завершение
 

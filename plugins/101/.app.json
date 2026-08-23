@@ -1,8 +1,12 @@
 {
   "apps": {
-    "101-v2": {
-      "id": "asdk_app_6a8a2c8be2088191b622c8c0fd50d4e8",
-      "required": true
+    "google_drive": {
+      "id": "connector_5f3c8c41a1e54ad7a76272c89e2554fa",
+      "required": false
+    },
+    "notion": {
+      "id": "asdk_app_69c18c28f1188191bf5b8445c4ab0a2e",
+      "required": false
     }
   }
 }

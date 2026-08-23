@@ -12,35 +12,75 @@ def read_json(path: str) -> dict:
 
 
 class PluginManifestTest(unittest.TestCase):
-    def test_required_101_app_matches_the_production_dependency(self):
-        app_manifest = read_json('plugins/101/.app.json')
-
+    def test_public_mcp_and_optional_apps_do_not_gate_installation(self):
+        self.assertTrue((ROOT / 'plugins/101/.mcp.json').is_file())
         self.assertEqual(
-            app_manifest,
+            read_json('plugins/101/.mcp.json'),
+            {
+                'mcpServers': {
+                    '101': {
+                        'type': 'http',
+                        'url': 'https://app.101-group.ru/mcp',
+                        'oauth_resource': 'https://app.101-group.ru/mcp',
+                    },
+                },
+            },
+        )
+        self.assertEqual(
+            read_json('plugins/101/.app.json'),
             {
                 'apps': {
-                    '101-v2': {
-                        'id': 'asdk_app_6a8a2c8be2088191b622c8c0fd50d4e8',
-                        'required': True,
+                    'google_drive': {
+                        'id': 'connector_5f3c8c41a1e54ad7a76272c89e2554fa',
+                        'required': False,
+                    },
+                    'notion': {
+                        'id': 'asdk_app_69c18c28f1188191bf5b8445c4ab0a2e',
+                        'required': False,
                     },
                 },
             },
         )
 
-    def test_marketplace_requires_authentication_during_install(self):
+    def test_public_marketplace_authenticates_on_first_use(self):
         marketplace = read_json('.agents/plugins/marketplace.json')
-        plugin = next(
-            item for item in marketplace['plugins'] if item['name'] == '101'
+        plugin = marketplace['plugins'][0]
+
+        self.assertEqual(marketplace['name'], '101-marketplace')
+        self.assertEqual(
+            marketplace['interface']['displayName'],
+            '101 Marketplace',
+        )
+        self.assertEqual(plugin['name'], '101')
+        self.assertEqual(
+            plugin['policy'],
+            {
+                'installation': 'AVAILABLE',
+                'authentication': 'ON_USE',
+            },
         )
 
-        self.assertEqual(plugin['policy']['authentication'], 'ON_INSTALL')
+    def test_public_plugin_manifest_exposes_release_components(self):
+        manifest = read_json('plugins/101/.codex-plugin/plugin.json')
+
+        self.assertEqual(manifest['name'], '101')
+        self.assertEqual(manifest['version'], '2.0.6')
+        self.assertEqual(manifest['mcpServers'], './.mcp.json')
+        self.assertEqual(manifest['apps'], './.app.json')
+        self.assertEqual(manifest['interface']['displayName'], '101')
+        self.assertLessEqual(len(manifest['interface']['defaultPrompt']), 3)
+        self.assertNotIn('private', manifest['description'].lower())
+        self.assertNotIn(
+            'private',
+            manifest['interface']['longDescription'].lower(),
+        )
 
     def test_patch_release_is_declared_consistently(self):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
 
-        self.assertEqual(manifest['version'], '2.0.5')
-        self.assertIn('Текущая версия плагина для Codex: `2.0.5`.', readme)
+        self.assertEqual(manifest['version'], '2.0.6')
+        self.assertIn('Текущая версия плагина для Codex: `2.0.6`.', readme)
 
     def test_bundled_analytics_runtime_matches_its_immutable_release_lock(self):
         widget_root = ROOT / 'plugins/101/widgets/analytics/v2'

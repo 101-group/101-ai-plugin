@@ -10,6 +10,8 @@ SKILLS = ROOT / 'plugins/101/skills'
 ANALYTICS = SKILLS / 'analytics-visualization'
 ARTIFACT_EXAMPLE = ANALYTICS / 'references/artifact-payload-example.json'
 ROUTING_CONTRACT = SKILLS / '101-index/references/presentation-routing.json'
+COMPANION_ROUTING = SKILLS / '101-index/references/companion-routing.json'
+ERROR_RECOVERY = SKILLS / '101-index/references/error-recovery.json'
 
 
 MANIFEST_ALLOWED = {
@@ -254,6 +256,49 @@ class PresentationRoutingContractTest(unittest.TestCase):
         self.assertIn('  - show_result', index)
         self.assertNotIn('Аналитика без графика', index)
         self.assertNotIn('сам факт аналитики не разрешает виджет', index)
+
+    def test_companion_routes_keep_external_plugins_optional(self):
+        self.assertTrue(COMPANION_ROUTING.is_file())
+        contract = read_json(COMPANION_ROUTING)
+        routes = {route['id']: route for route in contract['routes']}
+
+        self.assertEqual(routes['crm_crud']['owner'], 'crm-management')
+        self.assertEqual(routes['pdf_output']['owner'], 'pdf')
+        self.assertFalse(routes['pdf_output']['required'])
+        self.assertEqual(routes['extended_sales']['owner'], 'sales:index')
+        self.assertFalse(routes['extended_sales']['required'])
+        self.assertEqual(
+            routes['extended_sales']['fallback'],
+            'preserve_101_result',
+        )
+
+    def test_index_loads_companion_routing_contract(self):
+        index = (SKILLS / '101-index/SKILL.md').read_text(encoding='utf-8')
+
+        self.assertIn('path: references/companion-routing.json', index)
+        self.assertIn('kind: routing-contract', index)
+
+    def test_insufficient_tokens_has_browser_first_recovery_without_retry(self):
+        contract = read_json(ERROR_RECOVERY)
+        recovery = contract['errors']['insufficient_tokens']
+
+        self.assertEqual(recovery['code'], 'insufficient_tokens')
+        self.assertEqual(recovery['urlField'], 'topUpUrl')
+        self.assertEqual(recovery['urlSource'], 'server_result_only')
+        self.assertEqual(recovery['primaryAction'], 'open_in_app_browser')
+        self.assertEqual(recovery['fallbackAction'], 'show_clickable_link')
+        self.assertEqual(recovery['retry'], 'after_top_up_only')
+        self.assertEqual(recovery['freeTools'], 'remain_available')
+
+    def test_index_loads_and_explains_error_recovery_contract(self):
+        index = (SKILLS / '101-index/SKILL.md').read_text(encoding='utf-8')
+
+        self.assertIn('path: references/error-recovery.json', index)
+        self.assertIn('kind: error-recovery-contract', index)
+        self.assertIn('structuredContent.data.code', index)
+        self.assertIn('browser:control-in-app-browser', index)
+        self.assertIn('кликабельную Markdown-ссылку', index)
+        self.assertIn('Не повторяй исходный тарифицируемый MCP-вызов', index)
 
     def test_russian_event_list_mounts_the_existing_events_widget(self):
         route = self.routes['event_list']

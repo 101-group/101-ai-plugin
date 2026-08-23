@@ -1,7 +1,7 @@
 {
-  "name": "101-private",
+  "name": "101-marketplace",
   "interface": {
-    "displayName": "101 Private"
+    "displayName": "101 Marketplace"
   },
   "plugins": [
     {
@@ -12,7 +12,7 @@
       },
       "policy": {
         "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
+        "authentication": "ON_USE"
       },
       "category": "Productivity"
     }
