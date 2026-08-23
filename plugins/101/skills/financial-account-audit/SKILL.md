@@ -1,7 +1,7 @@
 ---
 name: financial-account-audit
-description: Use when the user asks how their finances, account, company, project, or object are doing; including vague questions such as "how are things going?" and requests to review financial risks.
-version: "1.0.0"
+description: Use when the user explicitly asks for a fast text-only financial risk review without charts or interactive analytics.
+version: "1.1.0"
 role: primary
 invocation: internal
 intents:
@@ -40,7 +40,7 @@ completion:
 
 # Аудит финансового состояния
 
-Если пользователь явно просит график или полноценную аналитику компании/проекта, верни маршрутизацию в `company-analytics`; этот workflow остаётся быстрым текстовым аудитом рисков.
+Этот workflow (сценарий) допустим только при явном ограничении «без графика», «только текст», «только данные» или эквивалентном. Любой обычный запрос на аудит, аналитику, анализ, оценку рисков или финансового состояния верни в `company-analytics`: там автоматически строится составной аналитический виджет. Ограниченное сравнение или динамика одного показателя также идёт в `company-analytics` для одного `render_chart`.
 
 Работай только на чтение. Цель — быстро найти существенные риски по подтверждённым данным и дать конкретные следующие действия. Не создавай отчёты, переводы или другие события: это отдельный skill расчётов.
 

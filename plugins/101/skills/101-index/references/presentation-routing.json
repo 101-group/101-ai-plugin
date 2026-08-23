@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "routes": [
+    {
+      "id": "bounded_comparison_or_trend",
+      "examples": [
+        "сравни проекты по балансу",
+        "покажи динамику расходов"
+      ],
+      "tools": [
+        "render_chart"
+      ],
+      "widget": {
+        "kind": "chart",
+        "resourceUri": "ui://101/analytics/chart-v2.html"
+      }
+    },
+    {
+      "id": "audit_or_multicomponent_analysis",
+      "examples": [
+        "сделай финансовый аудит",
+        "проанализируй финансовое состояние",
+        "оцени риски компании"
+      ],
+      "tools": [
+        "validate_artifact",
+        "render_artifact"
+      ],
+      "artifact": {
+        "text": true,
+        "kpi": true,
+        "charts": 3,
+        "table": true
+      },
+      "widget": {
+        "kind": "analytics_artifact",
+        "resourceUri": "ui://101/analytics/report-v2.html"
+      }
+    },
+    {
+      "id": "project_list",
+      "examples": [
+        "выведи список проектов",
+        "покажи проекты"
+      ],
+      "tools": [
+        "list_projects",
+        "show_result"
+      ],
+      "widget": {
+        "kind": "projects",
+        "resourceUri": "ui://101/widget/app-v1.html"
+      }
+    },
+    {
+      "id": "event_list",
+      "examples": [
+        "выведи список событий",
+        "покажи последние события"
+      ],
+      "tools": [
+        "list_events",
+        "show_result"
+      ],
+      "widget": {
+        "kind": "events",
+        "resourceUri": "ui://101/widget/app-v1.html"
+      }
+    },
+    {
+      "id": "scalar_read",
+      "examples": [
+        "сколько денег",
+        "найди проект Север"
+      ],
+      "tools": [],
+      "presentation": false
+    }
+  ]
+}
