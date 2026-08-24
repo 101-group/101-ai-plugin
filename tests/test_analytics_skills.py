@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / 'plugins/101/skills'
 ANALYTICS = SKILLS / 'analytics-visualization'
+CHART_EXAMPLE = ANALYTICS / 'references/chart-payload-example.json'
 ARTIFACT_EXAMPLE = ANALYTICS / 'references/artifact-payload-example.json'
 ROUTING_CONTRACT = SKILLS / '101-index/references/presentation-routing.json'
 COMPANION_ROUTING = SKILLS / '101-index/references/companion-routing.json'
@@ -55,6 +56,8 @@ TABLE_ALLOWED = {
 TABLE_COLUMN_ALLOWED = {'field', 'label', 'format', 'movement', 'role', 'semantic', 'type', 'unit'}
 SOURCE_ALLOWED = {'engine', 'language', 'tool', 'executedAt', 'description', 'filters', 'metrics'}
 SOURCE_METRIC_ALLOWED = {'id', 'definition'}
+STANDALONE_ALLOWED = {'title', 'source', 'table', 'chart', 'display'}
+STANDALONE_ENCODING_ALLOWED = {'field', 'type', 'aggregate', 'time_unit'}
 
 
 def read_json(path: Path) -> dict:
@@ -184,6 +187,24 @@ def validate_artifact_example(payload: dict) -> None:
                     raise ValueError('chart encoding references a missing field')
 
 
+def validate_chart_example(payload: dict) -> None:
+    assert_allowed_keys(payload, STANDALONE_ALLOWED, 'payload')
+    declared_fields = {column['key'] for column in payload['table']['columns']}
+    encodings = payload['chart']['fields']
+
+    for role in ('x', 'y'):
+        encoding = encodings[role]
+        if not isinstance(encoding, dict):
+            raise ValueError(f'chart.fields.{role} must be an object')
+        assert_allowed_keys(
+            encoding,
+            STANDALONE_ENCODING_ALLOWED,
+            f'chart.fields.{role}',
+        )
+        if encoding['field'] not in declared_fields:
+            raise ValueError(f'chart.fields.{role}.field is not declared')
+
+
 class AnalyticsArtifactContractTest(unittest.TestCase):
     def test_exact_example_is_a_required_visualization_resource(self):
         skill = (ANALYTICS / 'SKILL.md').read_text(encoding='utf-8')
@@ -204,6 +225,7 @@ class AnalyticsArtifactContractTest(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, r'^manifest\.scope is not allowed$'):
             validate_artifact_example(payload)
+
 
     def test_source_filters_reject_arrays_before_validate_artifact(self):
         payload = read_json(ARTIFACT_EXAMPLE)
@@ -234,6 +256,31 @@ class AnalyticsArtifactContractTest(unittest.TestCase):
         ):
             validate_artifact_example(payload)
 
+
+class AnalyticsChartContractTest(unittest.TestCase):
+    def test_exact_standalone_example_uses_typed_encodings(self):
+        payload = read_json(CHART_EXAMPLE)
+
+        validate_chart_example(payload)
+        self.assertEqual(
+            payload['chart']['fields']['x'],
+            {'field': 'month', 'type': 'temporal', 'time_unit': 'month'},
+        )
+        self.assertEqual(
+            payload['chart']['fields']['y'],
+            {'field': 'profit', 'type': 'quantitative'},
+        )
+
+    def test_string_encoding_is_rejected(self):
+        payload = read_json(CHART_EXAMPLE)
+        payload = copy.deepcopy(payload)
+        payload['chart']['fields']['x'] = 'month'
+
+        with self.assertRaisesRegex(
+            ValueError,
+            r'^chart\.fields\.x must be an object$',
+        ):
+            validate_chart_example(payload)
 
 class EventPositionsSkillContractTest(unittest.TestCase):
     def test_event_positions_uses_only_retained_price_list_reads(self):
