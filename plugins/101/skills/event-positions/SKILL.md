@@ -15,9 +15,6 @@ required_tools:
   - list_project_estimate_positions
 optional_tools:
   - list_price_lists
-  - list_price_list_categories
-  - list_price_list_positions
-  - search_price_list_positions
   - get_price_list
 resources:
   - path: ../shared-resources/events-and-positions.md
@@ -39,7 +36,7 @@ completion:
 
 ## Источники
 
-- Для позиции из прайса используй серверный поиск и верни действующую ссылку и значения API.
+- Для позиции из прайса сначала при необходимости выбери прайс через `list_price_lists`, затем вызови `get_price_list` с `price_list_id` и используй его полные categories/positions; отдельные list/search по категориям и позициям не используй.
 - Для позиции из сметы используй `list_project_estimate_positions` и сохрани её источник в форме API.
 - Для ручной позиции передай явные название, единицу, количество, цену и остальные обязательные поля без выдуманной ссылки на прайс.
 
