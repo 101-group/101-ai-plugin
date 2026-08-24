@@ -64,7 +64,7 @@ class PluginManifestTest(unittest.TestCase):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
 
         self.assertEqual(manifest['name'], '101')
-        self.assertEqual(manifest['version'], '2.0.7')
+        self.assertEqual(manifest['version'], '2.0.8')
         self.assertEqual(manifest['mcpServers'], './.mcp.json')
         self.assertEqual(manifest['apps'], './.app.json')
         self.assertEqual(manifest['interface']['displayName'], '101')
@@ -79,8 +79,8 @@ class PluginManifestTest(unittest.TestCase):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
 
-        self.assertEqual(manifest['version'], '2.0.7')
-        self.assertIn('Текущая версия плагина для Codex: `2.0.7`.', readme)
+        self.assertEqual(manifest['version'], '2.0.8')
+        self.assertIn('Текущая версия плагина для Codex: `2.0.8`.', readme)
 
     def test_task_management_skill_is_bundled_for_the_public_plugin(self):
         skill = ROOT / 'plugins/101/skills/task-management/SKILL.md'

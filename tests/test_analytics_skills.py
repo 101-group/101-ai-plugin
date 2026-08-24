@@ -235,6 +235,17 @@ class AnalyticsArtifactContractTest(unittest.TestCase):
             validate_artifact_example(payload)
 
 
+class EventPositionsSkillContractTest(unittest.TestCase):
+    def test_event_positions_uses_only_retained_price_list_reads(self):
+        text = (SKILLS / 'event-positions/SKILL.md').read_text(encoding='utf-8')
+
+        self.assertIn('  - list_price_lists', text)
+        self.assertIn('  - get_price_list', text)
+        self.assertNotIn('list_price_list_categories', text)
+        self.assertNotIn('list_price_list_positions', text)
+        self.assertNotIn('search_price_list_positions', text)
+
+
 class PresentationRoutingContractTest(unittest.TestCase):
     def setUp(self):
         contract = read_json(ROUTING_CONTRACT)
