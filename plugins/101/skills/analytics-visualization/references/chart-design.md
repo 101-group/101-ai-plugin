@@ -14,9 +14,10 @@
 
 ## Standalone contract (контракт одного графика)
 
+- Полный исполняемый образец хранится в `chart-payload-example.json`.
 - `render_chart({title, source, table, chart, display})` получает готовую bounded table (ограниченную таблицу), максимум 500 rows и 40 `table.columns`.
 - Идентификаторы полей — `lower_snake_case`; каждая row содержит ровно объявленные поля.
-- `chart.fields.x/y/color/size/label` ссылаются только на `table.columns[].key`.
+- `chart.fields.x/y/color/size/label/facet/lineStyle` — только объекты вида `{"field":"month","type":"temporal"}`; строковый shorthand (сокращение) `"x":"month"` запрещён. `field` ссылается только на `table.columns[].key`.
 - `source` описывает реальный вызов: `engine=101-mcp`, `language=mcp`, разрешённый MCP tool, RFC3339 `executedAt`, безопасные filters и определения metrics. SQL, GUID, URL, credentials и PII запрещены.
 - Значения `source.filters` — только непустые scalar (простые) `string|number|boolean`. Массив фактического MCP-аргумента отражается одной короткой строкой через запятую; массивы, объекты и `null` в payload запрещены.
 - Честно передавай `row_count` и `truncated`; не выдавай обрезанный набор за полный.
@@ -30,7 +31,7 @@
 - `manifest.blocks` задаёт внутренний текст, `metric-strip`, до четырёх charts и таблицы; стандарт аудита 101 — текст + KPI + 3 графика + таблица.
 - В стандартном аудите структурные ключи копируются из точного примера. Все ссылки обязаны разрешаться внутри payload (набора данных): `chartId`, `tableId`, `cardIds`, поля chart encodings (привязок графика) и поля таблицы. Опциональный `tables[].defaultSort` содержит только `field` и `direction`; `field` дословно совпадает с одним объявленным `tables[].columns[].field`, `direction` равен только `asc` или `desc`.
 - `snapshot.datasets` содержит те же проверенные агрегаты, максимум 500 rows и 40 полей на dataset.
-- `ready|partial|blocked|fixture` — единственные статусы. `partial` и `blocked` обязаны иметь понятный `accessIssues[].message`.
+- `ready|partial|blocked|fixture` — единственные статусы. `partial` и `blocked` обязаны иметь `accessIssues[]` с обязательными `id` в `lower_snake_case` и понятным `message`.
 - Сначала `validate_artifact`, затем неизменённый payload передаётся в `render_artifact`.
 
 ## Цвет, интерактивность и доступность
