@@ -222,7 +222,7 @@
   "snapshot": {
     "version": 1,
     "generatedAt": "2026-08-23T09:00:00Z",
-    "status": "ready",
+    "status": "partial",
     "datasets": {
       "monthly": [
         {
@@ -265,6 +265,12 @@
           "net": 800000
         }
       ]
-    }
+    },
+    "accessIssues": [
+      {
+        "id": "pending_project_events",
+        "message": "Часть проектов содержит неподтверждённые события."
+      }
+    ]
   }
 }

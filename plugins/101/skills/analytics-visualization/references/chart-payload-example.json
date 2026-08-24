@@ -1,0 +1,70 @@
+{
+  "title": "Прибыль партнёра по месяцам — 2026",
+  "source": {
+    "engine": "101-mcp",
+    "language": "mcp",
+    "tool": "list_events",
+    "executedAt": "2026-08-24T17:05:00Z",
+    "description": "Подтверждённая прибыль по проектам партнёра",
+    "filters": {
+      "dateFrom": "2026-01-01",
+      "dateTo": "2026-08-24",
+      "status": "partner_verified,client_accepted",
+      "withTotals": true
+    },
+    "metrics": [
+      {
+        "id": "profit",
+        "definition": "Сумма подтверждённой прибыли по проектам партнёра"
+      }
+    ]
+  },
+  "table": {
+    "columns": [
+      {
+        "key": "month",
+        "label": "Месяц",
+        "type": "date"
+      },
+      {
+        "key": "profit",
+        "label": "Прибыль",
+        "type": "number"
+      }
+    ],
+    "rows": [
+      {
+        "month": "2026-01-01",
+        "profit": 644450.57
+      },
+      {
+        "month": "2026-02-01",
+        "profit": 702548.77
+      }
+    ],
+    "row_count": 2,
+    "truncated": false
+  },
+  "chart": {
+    "type": "bar",
+    "fields": {
+      "x": {
+        "field": "month",
+        "type": "temporal",
+        "time_unit": "month"
+      },
+      "y": {
+        "field": "profit",
+        "type": "quantitative"
+      }
+    },
+    "settings": {
+      "showValues": true,
+      "sort": "none"
+    }
+  },
+  "display": {
+    "viewMode": "both",
+    "controls": true
+  }
+}
