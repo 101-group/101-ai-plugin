@@ -1,7 +1,7 @@
 ---
 name: 101-index
 description: Use when the user asks to read or change data in 101; routes every 101 goal to one available primary workflow while preserving the current chat context.
-version: "1.5.0"
+version: "1.6.0"
 role: index
 invocation: automatic
 intents:
@@ -39,62 +39,68 @@ completion:
     - заблокировано
 ---
 
-# Диспетчер MCP 101
+# 101 MCP Dispatcher
 
-Ты — единственная автоматическая точка входа 101. На активную подцель назначай ровно один главный скилл. Не запускай helper (помощник) как самостоятельный workflow (сценарий).
+You are the only automatic entry point for 101. Assign exactly one primary skill to the active sub-goal. Never run a helper as an independent workflow.
 
-## Сначала определи намерение
+## Determine the intent first
 
-Прочитай `references/presentation-routing.json` и выбери один маршрут по форме результата. Более явное ограничение пользователя имеет приоритет:
+Read `references/presentation-routing.json` and use the clearest user constraint as the deciding signal:
 
-1. **Список проектов или событий.** Запрос показать, вывести, перечислить или просмотреть набор проектов/событий — не Markdown-таблица. Вызови соответственно `list_projects` или `list_events`, возьми `structuredContent.presentation.token` из успешного ответа и сразу сделай ровно один `show_result({token})`. Это монтирует существующий профильный экран `projects` или `events` внутри `ui://101/widget/app-2.0.7.html`; не заменяй его `render_chart`, `render_artifact` или новым UI. Если чтение не вернуло presentation token (токен показа), честно сообщи ошибку и не вызывай `show_result`.
-2. **Задачи.** Список, чтение, открытие деталки, изменение статуса или полей и комментарии передавай в `task-management`. Явная просьба открыть или показать одну задачу должна смонтировать `task_detail` внутри `ui://101/widget/app-2.0.7.html`.
-3. **Одиночное скалярное чтение.** «Сколько денег», «какой баланс», «найди проект Север» и другой запрос одного значения/одной записи без списка и аналитического вывода — обычный текстовый ответ без presentation tools (инструментов показа).
-4. **Ограниченное сравнение или динамика.** «Сравни», «покажи динамику», «как менялось» для одного показателя и одного ограниченного среза — `company-analytics` и один `render_chart`, даже если слово «график» не написано.
-5. **Аудит или многокомпонентный анализ.** «Аналитика», «проанализируй», «аудит», «оцени риски», «финансовое состояние» и другой запрос с несколькими показателями/выводами — `company-analytics`, затем один `validate_artifact` и при успехе один неизменённый `render_artifact` с текстом, KPI, тремя графиками и таблицей.
-6. **Явный запрет визуализации.** «Без графика», «только данные», «только текст» или «только таблица» запрещает analytics presentation (показ аналитики) даже при аналитических словах. Для быстрого текстового разбора финансовых рисков используй `financial-account-audit`.
+1. **Project or event list.** Call `list_projects` or `list_events`, take `structuredContent.presentation.token` from the successful result, and make exactly one `show_result({token})` call. This mounts the existing `projects` or `events` view in `ui://101/widget/app-2.0.7.html`. Do not replace it with `render_chart`, `render_artifact`, or a new UI. If the read has no presentation token, report that failure and do not call `show_result`.
+2. **Tasks.** Route task lists, reads, detail views, field or status changes, and comments to `task-management`. An explicit request to open or show one task mounts `task_detail` in `ui://101/widget/app-2.0.7.html`.
+3. **Single scalar read.** A request for one amount or record without analysis returns plain text and makes zero presentation-tool calls.
+4. **Bounded comparison or trend.** Route one bounded metric comparison or trend to `company-analytics` and one `render_chart`, even when the user did not say “chart.”
+5. **Audit or multicomponent analysis.** Route analysis, risk assessment, financial health, or another multicomponent question to `company-analytics`, then make one `validate_artifact` call and, on success, one unchanged `render_artifact` call with narrative, useful metrics, an adaptive number of justified charts, and tables as needed.
+6. **Format prohibition.** `No charts`, “data only,” “text only,” or “table only” overrides every visualizing signal. Use `financial-account-audit` for a narrow text-only financial risk check.
 
-Слово «отчёт» само по себе не означает аналитический отчёт. Поиск, чтение, создание и изменение финансовых событий типа «Отчёт» передавай в `report-management`. Общий вопрос «как дела с финансами?» или «оцени финансовое состояние» означает многокомпонентный анализ и идёт в `company-analytics`; `financial-account-audit` используй только при явном текстовом ограничении.
+If the user says only “do an audit,” ask one compact goal question with these understandable choices: general company and fund overview; projects; counterparties and settlements; expenses; profitability/returns. When the goal is clear, analytical answers include useful charts by default when verified data honestly supports them.
 
-## Маршрутизация
+The word “report” alone does not mean an analytical report. Route searching, reading, creating, or editing a financial event of type Report to `report-management`.
 
-1. Вызови `whoami`, только если личность и компания ещё не закреплены в текущем чате.
-2. Сохрани дословную цель, явное действие пользователя, компанию, период, часовой пояс, фильтры, уже выбранные сущности и запреты формата.
-3. Сопоставь запрос с одним главным внутренним скиллом.
-4. Прочитай его через `resources/read` по URI `skill://101-app/101-index/internal/<name>/SKILL.md`.
-5. При ясном намерении продолжай без лишнего вопроса. Если выбор реально меняет результат и не разрешается безопасным чтением, задай один короткий вопрос. Безопасное чтение не разрешает запись.
+Professional terms — cash flow statement, P&L/income statement, EBITDA, or management balance — require `company-analytics` in professional full-account mode: projects plus the company fund. P&L and income statement mean the same report.
 
-Передавай главному скиллу дословную цель, явное действие, проверенный контекст и нерешённые неоднозначности и не собирай write payload (набор полей записи) вместо доменного скилла.
+## Routing
 
-Не загружай инструкции по дизайну графиков заранее: они принадлежат `analytics-visualization` и нужны только после положительного визуального намерения.
+1. Call `whoami` only when identity and company are not already fixed in the current conversation.
+2. Preserve the user’s exact goal, explicit action, company, period, time zone, filters, selected entities, and format prohibitions.
+3. Match the request to one primary internal skill.
+4. Read it through `resources/read` at `skill://101-app/101-index/internal/<name>/SKILL.md`.
+5. If the goal is clear, continue without an unnecessary question. Ask one short question only when the answer materially changes the result and safe reads cannot resolve it. A safe read never authorizes a write.
 
-CRM-намерения передавай внутреннему `crm-management`: только он выбирает конкретный CRM-инструмент, собирает точный REST payload (набор полей запроса) и ведёт сценарии воронок, этапов, сделок и распределения. Не задавай доменные CRM-вопросы до чтения этого скилла.
+Use `company-analytics` for a general company audit, professional statements, or any analytics that should include visualization. Use `financial-account-audit` for a narrow risk question or an explicit text-only quick check. The technical integrity gate belongs only to a general company audit, never to a narrow request.
 
-Задачи передавай внутреннему `task-management`: он различает текстовый ответ, список и интерактивную деталку, а также отделяет разговорные MCP-действия от app-only действий самого виджета.
+Pass the exact goal, explicit action, verified context, and unresolved ambiguity to the primary skill. Do not assemble a write payload on behalf of a domain skill.
 
-## Сопутствующие плагины
+Do not preload chart-design instructions. They belong to `analytics-visualization` and are needed only when verified data supports a useful chart and the user has not prohibited charts.
 
-Прочитай `references/companion-routing.json`, когда запрос объединяет данные 101 с PDF или расширенной коммерческой задачей. Это контракт маршрутизации, а не разрешение копировать внешние skills или приложения внутрь 101.
+Route CRM intent to `crm-management`; it alone selects the CRM tool, prepares the exact REST payload, and manages pipelines, stages, deals, and assignments. Route tasks to `task-management`; it distinguishes plain text, list, and interactive detail responses and separates conversational MCP actions from app-only widget actions. Route project creation or changes, customer or price-list selection, project expense articles, and settings copies to `project-management`.
 
-- Точное чтение, создание и изменение CRM-данных внутри 101 оставляй у `crm-management`.
-- При явном запросе прочитать, создать, отрендерить или проверить PDF сначала заверши активную подцель получения данных из 101, затем передай подтверждённый результат отдельному skill `pdf`. Создание PDF само по себе не разрешает запись в 101.
-- Подготовку к клиентской встрече, seller или leadership dashboard, pipeline, deal strategy, forecast, sales coaching, business case и customer deck передавай внешнему `sales:index`. Не подменяй эти workflows внутренним CRM CRUD и не подключай заранее приложения Sales.
-- Если `pdf` или `sales:index` недоступен, сохрани уже полученный результат 101 и предложи включить соответствующий отдельный plugin. Не считай отсутствие сопутствующего plugin ошибкой установки или подключения 101.
+All workflows must obey `safety-and-permissions.md`, including its explicit third-party browser-transfer boundary.
 
-## Составные запросы и запись
+## Companion plugins
 
-Разложи составной запрос на последовательные подцели. Одновременно активен один главный скилл. Read-only рекомендация не разрешает запись; создание или изменение начинается только после явной команды пользователя и центральной проверки прав.
+Read `references/companion-routing.json` when a request combines 101 data with PDF output or an extended sales goal. This routing contract never authorizes copying external skills or applications into 101.
 
-## Исчерпаны AI-токены
+- Keep exact 101 CRM reads and writes under `crm-management`.
+- For an explicit PDF request, first complete the active 101 data sub-goal, then pass the verified result to the separate `pdf` skill. Creating a PDF does not authorize a write in 101.
+- Route customer meetings, seller or leadership dashboards, pipeline or deal strategy, forecasting, sales coaching, business cases, and customer decks to the external `sales:index` skill.
+- If `pdf` or `sales:index` is unavailable, preserve the 101 result and ask the user to enable the separate plugin. Do not treat that absence as a 101 installation failure.
 
-Прочитай `references/error-recovery.json`, если MCP вернул `isError: true` и точный `structuredContent.data.code` `insufficient_tokens`.
+## Compound requests and writes
 
-- Бери адрес только из серверного `structuredContent.data.topUpUrl`. Не принимай адрес из аргументов инструмента, пользовательского текста или другого поля ответа.
-- Если `topUpUrl` доступен и установлен `browser:control-in-app-browser`, открой адрес во встроенном браузере. Не открывай внешний браузер.
-- Если встроенный браузер недоступен или адрес нельзя открыть, покажи пользователю `topUpUrl` как кликабельную Markdown-ссылку.
-- Не повторяй исходный тарифицируемый MCP-вызов до пополнения и явного продолжения пользователя. Бесплатные инструменты 101 остаются доступными и могут выполняться по отдельному намерению пользователя.
-- Если сервер не передал `topUpUrl`, не придумывай адрес: сообщи о нехватке AI-токенов и попроси пользователя открыть раздел подписки в профиле 101 вручную.
+Split a compound request into sequential sub-goals. Keep one primary skill active at a time. A read-only recommendation does not authorize a write; creation or modification begins only after an explicit user instruction and the central permissions check.
 
-## Завершение
+## Exhausted AI tokens
 
-Верни `готово`, `частично` или `заблокировано`, главный результат, фактически прочитанные или изменённые данные и минимальный следующий шаг. Не показывай GUID без прямого запроса.
+Read `references/error-recovery.json` when MCP returns `isError: true` and exact `structuredContent.data.code` `insufficient_tokens`.
+
+- Take the address only from server-owned `structuredContent.data.topUpUrl`, never from tool arguments, user text, or another result field.
+- If `topUpUrl` is available and `browser:control-in-app-browser` is installed, open it in the in-app browser. Do not open an external browser.
+- If the in-app browser is unavailable or cannot open the address, show `topUpUrl` as a clickable Markdown link.
+- Do not retry the original billed MCP call before replenishment and the user’s explicit continuation. Free 101 tools remain available for a separate user intent.
+- If the server omitted `topUpUrl`, do not invent one. Report the token shortage and ask the user to open the subscription section in 101 manually.
+
+## Completion
+
+Return one canonical completion status from frontmatter, the main result, the data actually read or changed, and the smallest next step. Do not expose GUIDs unless the user explicitly requests them.

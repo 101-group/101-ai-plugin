@@ -1,45 +1,131 @@
-# Дизайн OpenAI Data Analytics в 101
+# OpenAI Data Analytics Design in 101
 
-График — доказательство конкретного вывода. Зафиксируй вопрос, сравнение, единицы, период и зерно до выбора формы. Runtime (движок) поддерживает 18 canonical типов: `line`, `area`, `stackedArea`, `bar`, `horizontalBar`, `stackedBar`, `stackedBar100`, `horizontalStackedBar`, `horizontalStackedBar100`, `histogram`, `scatter`, `heatmap`, `pie`, `leaderboard`, `sparkline`, `funnel`, `waterfall`, `boxPlot`.
+A chart is evidence for a specific conclusion. Fix the question, comparison, units, period, and grain before selecting a form. The runtime supports 18 canonical types: `line`, `area`, `stackedArea`, `bar`, `horizontalBar`, `stackedBar`, `stackedBar100`, `horizontalStackedBar`, `horizontalStackedBar100`, `histogram`, `scatter`, `heatmap`, `pie`, `leaderboard`, `sparkline`, `funnel`, `waterfall`, `boxPlot`.
 
-## Выбор формы
+## Choose the form
 
-- Динамика: `line`, `area`, `stackedArea`, `sparkline`.
-- Сравнение и рейтинг: `bar`, `horizontalBar`, `leaderboard`.
-- Состав: `stackedBar`, `stackedBar100`, `horizontalStackedBar`, `horizontalStackedBar100`, `pie`.
-- Распределение и связи: `histogram`, `boxPlot`, `scatter`, `heatmap`.
-- Последовательность: `funnel`, `waterfall`.
+- Time movement: `line`, `area`, `stackedArea`, `sparkline`.
+- Comparison and ranking: `bar`, `horizontalBar`, `leaderboard`.
+- Composition: `stackedBar`, `stackedBar100`, `horizontalStackedBar`, `horizontalStackedBar100`, `pie`.
+- Distribution and relationships: `histogram`, `boxPlot`, `scatter`, `heatmap`.
+- Sequence: `funnel`, `waterfall`.
 
-Не выбирай форму только ради красоты. Временной тренд требует хотя бы две точки, `boxPlot` — достаточные числовые поля, а 100%-stacked (нормированный состав) — ненулевой знаменатель. Для длинных названий предпочитай горизонтальную форму. При редких данных покажи точные значения и ограничение интерпретации.
+Never choose a form only for decoration. A time trend needs at least two points, `boxPlot` needs sufficient numeric data, and a 100% stacked view needs a non-zero denominator. Prefer horizontal layouts for long category names. With sparse data, show exact values and state the interpretation limit.
 
-## Standalone contract (контракт одного графика)
+## Generator semantics
 
-- Полный исполняемый образец хранится в `chart-payload-example.json`.
-- `render_chart({title, source, table, chart, display})` получает готовую bounded table (ограниченную таблицу), максимум 500 rows и 40 `table.columns`.
-- Идентификаторы полей — `lower_snake_case`; каждая row содержит ровно объявленные поля.
-- `chart.fields.x/y/color/size/label/facet/lineStyle` — только объекты вида `{"field":"month","type":"temporal"}`; строковый shorthand (сокращение) `"x":"month"` запрещён. `field` ссылается только на `table.columns[].key`.
-- `source` описывает реальный вызов: `engine=101-mcp`, `language=mcp`, разрешённый MCP tool, RFC3339 `executedAt`, безопасные filters и определения metrics. SQL, GUID, URL, credentials и PII запрещены.
-- Значения `source.filters` — только непустые scalar (простые) `string|number|boolean`. Массив фактического MCP-аргумента отражается одной короткой строкой через запятую; массивы, объекты и `null` в payload запрещены.
-- Честно передавай `row_count` и `truncated`; не выдавай обрезанный набор за полный.
+The generator sends only raw numeric measures: values in rows/datasets remain unformatted numbers, while titles, labels, and narrative remain currency-neutral. Generated payloads must not include `unit`, `currency`, currency codes, currency symbols, or `format: currency`. Only the presentation layer adds localized magnitude formatting to a raw number. Do not build a sanitizer or Unicode/ISO currency recognition; construct a correct raw payload at the generator boundary instead of repairing it later.
 
-## Composite contract (контракт составного отчёта)
+Do not perform SQL UI/payload reconstruction. Charts and artifacts use only actual aggregates from the MCP source, with no query editor, SQL panel, or display-only data reconstruction.
 
-- Один аудит — один `{surface, manifest, snapshot}` и один `render_artifact`, а не четыре независимых графика.
-- Перед сборкой прочитай `artifact-payload-example.json`: это точный валидный production-пример для `validate_artifact` и `render_artifact`.
-- Верхний уровень разрешает только `surface`, `manifest`, `snapshot`. В `manifest` обязательны `version`, `surface`, `title`, `generatedAt`, `blocks`, `sources`; опциональны только `description`, `filters`, `cards`, `charts`, `tables`. В `snapshot` обязательны `version`, `generatedAt`, `status`, `datasets`; опционален только `accessIssues`.
-- `manifest.scope` и `snapshot.scope` запрещены. Не переносить `scope`, `provenance`, `subtitle`, `rows`, `chart`, `display` или другие поля старого standalone-контракта на уровень `manifest`/`snapshot`.
-- `manifest.blocks` задаёт внутренний текст, `metric-strip`, до четырёх charts и таблицы; стандарт аудита 101 — текст + KPI + 3 графика + таблица.
-- В стандартном аудите структурные ключи копируются из точного примера. Все ссылки обязаны разрешаться внутри payload (набора данных): `chartId`, `tableId`, `cardIds`, поля chart encodings (привязок графика) и поля таблицы. Опциональный `tables[].defaultSort` содержит только `field` и `direction`; `field` дословно совпадает с одним объявленным `tables[].columns[].field`, `direction` равен только `asc` или `desc`.
-- `snapshot.datasets` содержит те же проверенные агрегаты, максимум 500 rows и 40 полей на dataset.
-- `ready|partial|blocked|fixture` — единственные статусы. `partial` и `blocked` обязаны иметь `accessIssues[]` с обязательными `id` в `lower_snake_case` и понятным `message`.
-- Сначала `validate_artifact`, затем неизменённый payload передаётся в `render_artifact`.
+For `horizontalBar`, always bind the category to `x` and the quantitative measure to `y`; orientation does not reverse these roles. Diverging example:
 
-## Цвет, интерактивность и доступность
+```json
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "Project balances",
+    "description": "Comparison of project balances",
+    "generatedAt": "2026-08-22T10:00:00Z",
+    "blocks": [
+      {
+        "id": "summary",
+        "type": "markdown",
+        "layout": "full",
+        "body": "Balance shows the difference between project inflows and outflows."
+      },
+      {
+        "id": "project_balances_chart_block",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "project_balances_chart"
+      },
+      {
+        "id": "project_balances_table_block",
+        "type": "table",
+        "layout": "full",
+        "tableId": "project_balances_table"
+      }
+    ],
+    "charts": [
+      {
+        "id": "project_balances_chart",
+        "title": "Project balances",
+        "type": "horizontalBar",
+        "dataset": "project_balances",
+        "encodings": {
+          "x": {"field": "project", "type": "nominal"},
+          "y": {"field": "balance", "type": "quantitative"}
+        },
+        "valueFormat": "number",
+        "layout": "full"
+      }
+    ],
+    "tables": [
+      {
+        "id": "project_balances_table",
+        "title": "Project balances",
+        "dataset": "project_balances",
+        "columns": [
+          {"field": "project", "label": "Project", "type": "text"},
+          {"field": "balance", "label": "Balance", "format": "number"}
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "engine": "101-mcp",
+        "language": "mcp",
+        "tool": "list_projects",
+        "executedAt": "2026-08-22T10:00:00Z",
+        "description": "Project summary metrics",
+        "filters": {},
+        "metrics": [{"id": "balance", "definition": "Inflows minus outflows"}]
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-08-22T10:00:00Z",
+    "status": "ready",
+    "datasets": {
+      "project_balances": [
+        {"project": "North Project", "balance": -5},
+        {"project": "South Project", "balance": 8}
+      ]
+    }
+  }
+}
+```
 
-Цветовые токены накладывает frontend через `@101app/design-tokens-web`; модель не передаёт hex, CSS и произвольные токены. Смысл не должен держаться только на цвете: положение, знак, подпись, контур и форма остаются читаемыми.
+In this example, `x=project` and `y=balance`; negative and positive raw values remain unchanged in `snapshot.datasets`, while narrative belongs in `manifest.description` and a markdown block. Do not connect the five generic export actions in the export menu to `101_generate_document`: that tool creates standard business documents and does not export the current analytics artifact.
 
-Hover и keyboard focus открывают одинаковый tooltip. Legend позволяет выключать серии, но не последнюю видимую. Полные значения доступны в table view. На mobile подписи не пересекаются, длинные категории сохраняются в tooltip/таблице, а expanded editor (расширенный режим) не теряет контекст.
+## Standalone contract
 
-## Финальный QA
+- The complete executable example is `chart-payload-example.json`.
+- `render_chart({title, source, table, chart, display})` receives a ready bounded table with at most 500 rows and 40 `table.columns`.
+- Field identifiers use `lower_snake_case`; every row contains exactly the declared fields.
+- `chart.fields.x/y/color/size/label/facet/lineStyle` accepts only encoding objects such as `{"field":"month","type":"temporal"}`. String shorthand such as `"x":"month"` is invalid. Each `field` references `table.columns[].key`.
+- `source` describes the actual call: `engine=101-mcp`, `language=mcp`, an allowed MCP tool, RFC3339 `executedAt`, safe filters, and metric definitions. SQL, GUIDs, URLs, credentials, and PII are forbidden.
+- Report `row_count` and `truncated` honestly. Never present a truncated dataset as complete.
 
-Проверь desktop/mobile и light/dark: chart не пуст, marks (элементы) имеют ненулевой размер, ноль и знак честны, tooltip/focus/legend/table работают, source видим, empty/sparse/error состояния объяснены. Локальные изменения типа, группировки и layout (раскладки) не требуют MCP-вызова; новая компания, период, метрика или данные требуют нового business fetch и snapshot.
+## Composite contract
+
+- The canonical partial artifact is `artifact-payload-example.json`.
+- One audit uses one `{surface, manifest, snapshot}` and one `render_artifact`, not independent chart calls.
+- `manifest.blocks` may contain narrative, a `metric-strip`, up to four charts, and tables. Use an adaptive number of charts and include only charts justified by the analytical question and verified data; no fixed count is required.
+- `snapshot.datasets` contains the same verified aggregates, with at most 500 rows and 40 fields per dataset.
+- `ready|partial|blocked|fixture` are the only statuses. `partial` and `blocked` require `accessIssues[]` with a `lower_snake_case` `id` and an understandable `message`.
+- Call exactly one `validate_artifact`, then pass the unchanged payload to `render_artifact`.
+
+## Color, interaction, and accessibility
+
+The frontend applies color tokens through `@101app/design-tokens-web`; the model never sends hex values, CSS, or arbitrary tokens. Meaning cannot depend on color alone: position, sign, label, outline, and shape remain readable.
+
+Hover and keyboard focus open the same tooltip. The legend may hide series but not the last visible one. Full values remain available in table view. On mobile, labels do not overlap, long categories remain available in the tooltip or table, and the expanded editor keeps context.
+
+## Final QA
+
+Check desktop/mobile and light/dark: the chart is not empty, marks have non-zero size, zero and sign are honest, tooltip/focus/legend/table work, source is visible, and empty/sparse/error states are explained. Local changes to chart type, grouping, or layout do not require an MCP call; a new company, period, metric, or dataset requires a new business fetch and snapshot.

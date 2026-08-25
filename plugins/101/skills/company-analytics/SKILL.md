@@ -1,7 +1,7 @@
 ---
 name: company-analytics
-description: Use for source-backed company or project analytics, standalone charts, and composite Data Analytics audits from known 101 aggregates.
-version: "2.0.1"
+description: Use when the user requests source-backed company or project analytics, financial statements, useful charts, or a general 101 audit.
+version: "2.1.0"
 role: primary
 invocation: internal
 intents:
@@ -17,8 +17,13 @@ required_tools:
   - list_events
   - list_contractor_project_balances
 optional_tools:
+  - get_event
   - list_contractors
   - list_project_members
+  - get_project_fund_settlements
+  - list_company_fund_projects
+  - list_company_fund_members
+  - list_company_fund_expenses_by_bill
   - list_project_bill_balances
   - list_project_estimate_positions
   - list_bills
@@ -36,6 +41,15 @@ resources:
   - path: ../shared-resources/safety-and-permissions.md
     kind: semantic-guide
     required: true
+  - path: ../shared-resources/technical-integrity-audit.md
+    kind: semantic-guide
+    required: true
+  - path: ../shared-resources/financial-risks-and-project-controls.md
+    kind: semantic-guide
+    required: true
+  - path: ../shared-resources/management-reporting-and-balances.md
+    kind: semantic-guide
+    required: true
 completion:
   statuses:
     - готово
@@ -43,40 +57,57 @@ completion:
     - заблокировано
 ---
 
-# Аналитика и составные аудиты 101
+# 101 Company Analytics and Audits
 
-Работай только на чтение и используй известный контракт 101. Не исследуй базу и схему заново, не строй новый слой метрик, не запускай внешнюю вычислительную среду и не выгружай сырые события ради уже доступных агрегатов.
+Work read-only against the known 101 contract. Do not rediscover the database or schema, create a parallel metric layer, run an external compute environment, or export raw events when an available aggregate answers the question. Obey `safety-and-permissions.md`; in particular, refuse any request to transfer 101 data to a third-party system through browser automation.
 
-## Gate (правило) результата
+## Goal and mode gate
 
-Классифицируй запрос до чтения данных:
+- If the user says only “do an audit,” ask one compact goal question: general company and fund overview; projects; counterparties and settlements; expenses; profitability/returns.
+- If the goal is clear, analyze immediately.
+- Plain data or a list uses zero presentation-tool calls.
+- Analytics includes useful charts by default when verified data honestly supports them. An explicit “chart,” “visualize,” “show the trend,” or “interactive” request also enables visualization.
+- Explicit format prohibition overrides every visualization signal: `No charts`, “data only,” “text only,” or “table only” disables visualization.
+- Professional terms — cash flow statement, P&L/income statement, EBITDA, or management balance — require professional full-account analysis: projects plus the company fund. Cash flow, P&L, and the management balance form the classic three-statement set; P&L and income statement are the same report.
+- Give a non-professional user an ordinary management overview from the same data. Change the presentation, not the evidence.
+- If a standard metric cannot be calculated honestly, name the available management analogue, show its formula, and state its limitations.
 
-- запрос одного значения/одной записи без анализа — верни проверенные данные и сделай 0 вызовов presentation tools (инструментов показа);
-- один ограниченный вопрос на сравнение или динамику одного показателя — собери один `render_chart`, даже если пользователь не написал слово «график»;
-- аудит, аналитика, анализ, оценка рисков, финансового состояния или другой многокомпонентный вопрос — собери один составной artifact (отчёт), вызови один `validate_artifact`, затем при успехе один неизменённый `render_artifact`;
-- «без графика», «только данные», «только текст» или «только таблица» — явный запрет сильнее автоматической визуализации.
+## General company audit gate
 
-Списки проектов и событий до этого workflow (сценария) не доходят: `101-index` показывает их через исходный `show_result` и профильный list widget (виджет списка). Для каждого разрешённого аналитического маршрута прочитай `analytics-visualization` через `resources/read` и следуй ему. До этого не загружай его chart-design (правила дизайна графика).
+The technical integrity audit is mandatory only before a general company audit. Do not run it before a narrow request about one project, counterparty, expense class, or metric.
 
-## Данные без лишней разведки
+For a general company audit, read `technical-integrity-audit.md` and fully read all event pages plus every necessary event detail. If a page, detail, structural link, distribution, or arithmetic check fails, stop the general financial audit. Return the issues and recommendations without changing data.
 
-1. Используй закреплённую компанию; вызывай `whoami` и `entity-resolution` только когда контекст её не определяет или название неоднозначно.
-2. Текущий управленческий баланс бери из `get_company_closing_balance`.
-3. Активные проекты и их доступные сводные поля бери из `list_projects`; углубляйся только в показатель, нужный для вопроса.
-4. Суммы событий получай через `list_events` с `with_totals=true`, `per_page=0`, точным `company_guid`, периодом и `status=[partner_verified, client_accepted]`. Не выгружай сырые события и не пагинируй их, если вопрос отвечает блок `totals`/`balanceTotals`.
-5. Для динамики разбей период на непересекающиеся интервалы и сделай один агрегирующий вызов на интервал. Используй запрошенное зерно; без него выбери самое крупное честное зерно, но не более 12 интервалов. Границы дат считай в заданном часовом поясе, по умолчанию Europe/Moscow.
-6. Не смешивай подтверждённые и неподтверждённые события. Если пользователь явно просит только подтверждённые, фильтры `partner_verified` и `client_accepted` обязательны.
+After the gate passes, read only the references required by the selected mode:
 
-Сверяй единицы, период, знак и одинаковое зерно сравниваемых рядов. Причину движения называй причиной только при прямом доказательстве; иначе это гипотеза.
+- `financial-risks-and-project-controls.md` for drafts, duplicate warnings, contractor quality, and manual service positions;
+- `management-reporting-and-balances.md` for accrual P&L, cash flow, EBITDA, fund expense classification, large purchases, owner reporting, and the management settlement balance.
 
-## Визуальный вызов
+For a superficial general audit, show a short company/fund overview and the project portfolio. Drill into settlements or expenses only when a risk warrants it, and offer deeper analysis before adding detail.
 
-Один `render_chart` показывает один ограниченный график. Для аудита не делай четыре независимых `render_chart`: один составной `render_artifact` обязан содержать текст + KPI + 3 графика + таблица. Базовый финансовый аудит включает месячные поступления/расходы, чистый денежный поток и остатки проектов либо воронку по этапам — выбирай третий график по фактическим доступным данным.
+## Data access without unnecessary discovery
 
-Передавай только агрегированные bounded datasets (ограниченные наборы), честные `source`/`manifest.sources[]` со строгим `executedAt` и безопасными `filters` фактического MCP-вызова без GUID. Сначала вызови `validate_artifact` с тем же `{surface, manifest, snapshot}`. Если validation (проверка) успешна, вызови `render_artifact` ровно один раз с неизменённым payload (набором). Не повторяй успешный presentation call (вызов показа).
+1. Use the fixed company. Call `whoami` and `entity-resolution` only when context is missing or ambiguous.
+2. Use `get_company_closing_balance` for the current management settlement balance, following `management-reporting-and-balances.md`.
+3. Use `list_projects` for the project portfolio and drill into only the metric needed for the goal. Call `list_project_members` only together with `get_project_fund_settlements` for the same `project_guid`; use `finance-and-balances.md` for signs, successful zeros, and partial results.
+4. For ordinary aggregate metrics, use `list_events` with `with_totals=true`, `per_page=0`, exact `company_guid`, period, and `status=[partner_verified, client_accepted]`. Do not export raw events when `totals` or `balanceTotals` answers the question. Full event pagination is required only for the technical integrity gate of a general company audit.
+5. For a time series, split the period into non-overlapping intervals and make one aggregate call per interval. Use the requested grain; otherwise choose the coarsest honest grain with at most 12 intervals. Use the requested time zone, defaulting to Europe/Moscow.
+6. Never mix confirmed and unconfirmed events. Keep drafts outside the primary totals and offer a separate impact scenario.
 
-Локальная смена типа графика, группировки, фильтра уже загруженных строк, раскладки, подписей и режима таблицы выполняется внутри React runtime (движка) без нового MCP-вызова. Новый период, компания, метрика или данные требуют повторного business fetch (получения данных), нового snapshot (снимка) и новой проверки.
+Keep projects and the company fund as separate contours. A direct Company Fund Inflow is external financing or investment for company expenses, never revenue or profit. Project ↔ fund transfers are internal and do not create income or expense again when consolidated.
 
-## Ответ
+Compare like units, periods, signs, and grains. Call a movement a cause only with direct evidence; otherwise label it a hypothesis. In user-facing text say “company owner,” not “founder”; the technical role may remain `owner`. Express amounts as rubles, thousands, millions, and similar worded magnitudes without currency codes or symbols.
 
-Начни с ответа на вопрос. Затем дай ключевые числа, выводы/риски и конкретные действия. Для одиночного скалярного запроса не навязывай аналитику. Для аудита отдели факты от гипотез и укажи ограничения. Не показывай GUID без прямого запроса и не заявляй, что график или отчёт отрисован, если presentation tool (инструмент показа) завершился ошибкой.
+## Visualization contract
+
+Read `analytics-visualization` only after the mode gate allows visualization. One `render_chart` serves a focused standalone chart. A broader audit uses one composite artifact; do not split one audit into independent `render_chart` calls.
+
+Adapt the number and type of charts to the question and the available honest data. Include only useful charts; no fixed chart count is a success criterion. Pass bounded aggregated datasets and truthful `source`/`manifest.sources[]` metadata with strict `executedAt` and safe filters from the actual MCP call, without GUIDs. Call one `validate_artifact` and, on success, pass the unchanged payload to one `render_artifact`. Do not repeat a successful presentation call.
+
+Local changes to chart type, grouping, filters over already loaded rows, layout, labels, or table mode run inside the React runtime without a new MCP call. A new company, period, metric, or dataset requires a new business fetch, snapshot, and validation.
+
+## Response
+
+Lead with the answer, then give key numbers, findings or risks, limitations, and concrete actions. Separate facts from hypotheses. Include useful charts by default when the data supports them and no format prohibition applies. After every analytical answer, offer relevant directions for deeper analysis based on the observed data and risks.
+
+Do not expose GUIDs unless explicitly requested. Do not claim a chart or report rendered if the presentation tool failed. Any mutation requires explicit confirmation and the permissions check.

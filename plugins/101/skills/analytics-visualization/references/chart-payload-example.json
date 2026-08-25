@@ -1,11 +1,11 @@
 {
-  "title": "Прибыль партнёра по месяцам — 2026",
+  "title": "Partner profit by month — 2026",
   "source": {
     "engine": "101-mcp",
     "language": "mcp",
     "tool": "list_events",
     "executedAt": "2026-08-24T17:05:00Z",
-    "description": "Подтверждённая прибыль по проектам партнёра",
+    "description": "Confirmed profit across the partner's projects",
     "filters": {
       "dateFrom": "2026-01-01",
       "dateTo": "2026-08-24",
@@ -15,7 +15,7 @@
     "metrics": [
       {
         "id": "profit",
-        "definition": "Сумма подтверждённой прибыли по проектам партнёра"
+        "definition": "Total confirmed profit across the partner's projects"
       }
     ]
   },
@@ -23,12 +23,12 @@
     "columns": [
       {
         "key": "month",
-        "label": "Месяц",
+        "label": "Month",
         "type": "date"
       },
       {
         "key": "profit",
-        "label": "Прибыль",
+        "label": "Profit",
         "type": "number"
       }
     ],

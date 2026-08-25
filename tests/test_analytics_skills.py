@@ -1,5 +1,6 @@
 import copy
 import json
+import re
 import unittest
 import zipfile
 from pathlib import Path
@@ -13,6 +14,23 @@ ARTIFACT_EXAMPLE = ANALYTICS / 'references/artifact-payload-example.json'
 ROUTING_CONTRACT = SKILLS / '101-index/references/presentation-routing.json'
 COMPANION_ROUTING = SKILLS / '101-index/references/companion-routing.json'
 ERROR_RECOVERY = SKILLS / '101-index/references/error-recovery.json'
+
+
+ENGLISH_FINANCIAL_AUDIT_FILES = (
+    '101-index/SKILL.md',
+    'analytics-visualization/SKILL.md',
+    'analytics-visualization/references/artifact-payload-example.json',
+    'analytics-visualization/references/chart-design.md',
+    'analytics-visualization/references/chart-payload-example.json',
+    'company-analytics/SKILL.md',
+    'financial-account-audit/SKILL.md',
+    'shared-resources/context-and-identity.md',
+    'shared-resources/finance-and-balances.md',
+    'shared-resources/financial-risks-and-project-controls.md',
+    'shared-resources/management-reporting-and-balances.md',
+    'shared-resources/safety-and-permissions.md',
+    'shared-resources/technical-integrity-audit.md',
+)
 
 
 MANIFEST_ALLOWED = {
@@ -159,12 +177,10 @@ def validate_artifact_example(payload: dict) -> None:
     table_ids = {table['id'] for table in manifest.get('tables', [])}
     block_types = [block['type'] for block in manifest['blocks']]
 
-    if len(chart_ids) != 3:
-        raise ValueError('manifest must contain exactly three charts')
-    if 'markdown' not in block_types or 'metric-strip' not in block_types:
-        raise ValueError('manifest must contain text and KPI blocks')
-    if 'table' not in block_types:
-        raise ValueError('manifest must contain a table block')
+    if len(chart_ids) > 4:
+        raise ValueError('manifest may contain at most four charts')
+    if not block_types:
+        raise ValueError('manifest must contain at least one block')
 
     for block in manifest['blocks']:
         if block['type'] == 'chart' and block['chartId'] not in chart_ids:
@@ -176,7 +192,7 @@ def validate_artifact_example(payload: dict) -> None:
             raise ValueError('table block references a missing table')
 
     datasets = snapshot['datasets']
-    for chart in manifest['charts']:
+    for chart in manifest.get('charts', []):
         rows = datasets[chart['dataset']]
         declared_fields = set(rows[0])
         for encoding in chart['encodings'].values():
@@ -210,8 +226,8 @@ class AnalyticsArtifactContractTest(unittest.TestCase):
         skill = (ANALYTICS / 'SKILL.md').read_text(encoding='utf-8')
 
         self.assertIn('path: references/artifact-payload-example.json', skill)
-        self.assertIn('kind: contract-example', skill)
-        self.assertIn('manifest.scope', skill)
+        self.assertIn('kind: payload-example', skill)
+        self.assertIn('adaptive number of justified charts', skill)
 
     def test_exact_example_matches_the_production_artifact_shape(self):
         payload = read_json(ARTIFACT_EXAMPLE)
@@ -244,10 +260,16 @@ class AnalyticsArtifactContractTest(unittest.TestCase):
     def test_table_default_sort_must_reference_a_declared_column(self):
         payload = read_json(ARTIFACT_EXAMPLE)
         payload = copy.deepcopy(payload)
-        payload['manifest']['tables'][0]['defaultSort'] = {
-            'field': 'undeclared_month',
-            'direction': 'asc',
-        }
+        payload['manifest']['tables'] = [{
+            'id': 'project_balances',
+            'title': 'Project balances',
+            'dataset': next(iter(payload['snapshot']['datasets'])),
+            'columns': [{'field': 'project', 'label': 'Project'}],
+            'defaultSort': {
+                'field': 'undeclared_month',
+                'direction': 'asc',
+            },
+        }]
 
         with self.assertRaisesRegex(
             ValueError,
@@ -355,8 +377,8 @@ class PresentationRoutingContractTest(unittest.TestCase):
         self.assertIn('kind: error-recovery-contract', index)
         self.assertIn('structuredContent.data.code', index)
         self.assertIn('browser:control-in-app-browser', index)
-        self.assertIn('кликабельную Markdown-ссылку', index)
-        self.assertIn('Не повторяй исходный тарифицируемый MCP-вызов', index)
+        self.assertIn('clickable Markdown link', index)
+        self.assertIn('Do not retry the original billed MCP call', index)
 
     def test_russian_event_list_mounts_the_existing_events_widget(self):
         route = self.routes['event_list']
@@ -386,10 +408,91 @@ class PresentationRoutingContractTest(unittest.TestCase):
         self.assertEqual(artifact['tools'], ['validate_artifact', 'render_artifact'])
         self.assertEqual(
             artifact['artifact'],
-            {'text': True, 'kpi': True, 'charts': 3, 'table': True},
+            {
+                'text': True,
+                'kpi': 'as_needed',
+                'charts': 'adaptive',
+                'tables': 'as_needed',
+            },
         )
         self.assertEqual(scalar['tools'], [])
         self.assertFalse(scalar['presentation'])
+
+
+class ProductionMcpSkillSyncTest(unittest.TestCase):
+    def test_financial_audit_active_bodies_and_resources_are_english(self):
+        cyrillic = re.compile(r'[А-Яа-яЁё]')
+
+        for relative_path in ENGLISH_FINANCIAL_AUDIT_FILES:
+            path = SKILLS / relative_path
+            self.assertTrue(path.is_file(), relative_path)
+            source = path.read_text(encoding='utf-8')
+            if path.name == 'SKILL.md':
+                source = source.split('---', 2)[2]
+            self.assertIsNone(cyrillic.search(source), relative_path)
+
+    def test_fund_reads_and_legacy_tools_remain_available(self):
+        new_tools = (
+            'list_company_fund_projects',
+            'list_company_fund_members',
+            'list_company_fund_expenses_by_bill',
+        )
+        legacy_tools = (
+            'get_project_fund_settlements',
+            'list_project_members',
+            'list_bills',
+        )
+
+        for skill_name in ('company-analytics', 'financial-account-audit'):
+            source = (SKILLS / skill_name / 'SKILL.md').read_text(encoding='utf-8')
+            for tool_name in new_tools + legacy_tools:
+                self.assertIn(f'  - {tool_name}', source, (skill_name, tool_name))
+
+        settlements = (
+            SKILLS / 'settlements-and-transfers/SKILL.md'
+        ).read_text(encoding='utf-8')
+        self.assertIn('  - list_project_members', settlements)
+        self.assertIn('  - get_project_fund_settlements', settlements)
+
+        project_management = SKILLS / 'project-management/SKILL.md'
+        self.assertTrue(project_management.is_file())
+        self.assertIn(
+            '  - list_bills',
+            project_management.read_text(encoding='utf-8'),
+        )
+
+    def test_browser_transfer_boundary_is_explicit_and_narrow(self):
+        source = (
+            SKILLS / 'shared-resources/safety-and-permissions.md'
+        ).read_text(encoding='utf-8')
+
+        self.assertIn(
+            'transfer 101 data to a third-party system through a browser or '
+            'browser automation, refuse',
+            source,
+        )
+        self.assertIn(
+            'does not prohibit ordinary authorized reading and analysis '
+            'inside 101 or the current trusted context',
+            source,
+        )
+
+    def test_all_declared_skill_resource_links_resolve(self):
+        for skill_path in SKILLS.glob('*/SKILL.md'):
+            frontmatter = skill_path.read_text(encoding='utf-8').split('---', 2)[1]
+            for relative_path in re.findall(r'^\s+- path: (.+)$', frontmatter, re.M):
+                resource = (skill_path.parent / relative_path).resolve()
+                self.assertTrue(resource.is_file(), (skill_path, relative_path))
+
+    def test_russian_canonical_financial_sources_are_not_packaged(self):
+        packaged = {
+            path.relative_to(SKILLS).as_posix()
+            for path in SKILLS.rglob('*')
+            if path.is_file()
+        }
+
+        self.assertFalse(any('/ru/' in f'/{path}/' for path in packaged))
+        self.assertNotIn('company-financial-audit.md', packaged)
 
 
 class SkillsArchiveTest(unittest.TestCase):
