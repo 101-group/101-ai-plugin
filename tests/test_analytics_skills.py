@@ -527,6 +527,8 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
                     '- готово',
                     '- частично',
                     '- не завершено',
+                    'частично',
+                    'не завершено',
                 }:
                     continue
                 if cyrillic.search(without_literals):
@@ -536,7 +538,13 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
 
     def test_financial_audit_active_bodies_and_resources_are_english(self):
         cyrillic = re.compile(r'[А-Яа-яЁё]')
-        allowed_literals = ('`готово`', '`частично`', '`не завершено`')
+        allowed_literals = (
+            '`готово`',
+            '`частично`',
+            '`не завершено`',
+            'частично',
+            'не завершено',
+        )
 
         for relative_path in ENGLISH_FINANCIAL_AUDIT_FILES:
             path = SKILLS / relative_path

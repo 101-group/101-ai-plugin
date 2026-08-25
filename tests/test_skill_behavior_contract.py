@@ -36,41 +36,44 @@ def read_skill_resource(relative_path: str) -> str:
     return (SKILLS / relative_path).read_text(encoding='utf-8')
 
 
-def safe_action_contract(policy: str) -> bool:
-    normalized = policy.lower()
-    required_fragments = (
-        'safe reads, searches, calculations, preparation, exact matching',
-        'immediately',
-        'ask only when required data is genuinely ambiguous or missing',
-        'an action is irreversible',
-        'a write outcome is unknown',
-        'fresh mutable state conflicts',
-        'another material risk requires a user decision',
+def policy_bullets(policy: str) -> list[str]:
+    return [
+        line.removeprefix('- ').strip()
+        for line in policy.splitlines()
+        if line.startswith('- ')
+    ]
+
+
+def parse_unfinished_completion_examples(policy: str) -> dict[str, str]:
+    match = re.search(
+        (
+            r'```text\n'
+            r'(частично)\n([^\n]+)\n'
+            r'(не завершено)\n([^\n]+)\n'
+            r'```'
+        ),
+        policy,
     )
-    return all(fragment in normalized for fragment in required_fragments)
+    if match is None:
+        raise AssertionError('missing canonical unfinished completion example block')
+
+    return {
+        match.group(1): match.group(2),
+        match.group(3): match.group(4),
+    }
 
 
-def immediate_follow_up_contract(policy: str) -> bool:
-    normalized = policy.lower()
-    required_fragments = (
-        'canonical user-facing completion status',
-        '`частично` or `не завершено`',
-        'immediately following line',
-        'concrete reason',
-        'smallest safe next step',
-    )
-    return all(fragment in normalized for fragment in required_fragments)
-
-
-def central_financial_confirmation_contract(policy: str) -> bool:
-    normalized = policy.lower()
-    required_fragments = (
-        'explicitly and unambiguously requests a financial event',
-        'every required value and entity is known',
-        'do not add a conversational confirmation',
-        'use only the central mcp confirmation',
-    )
-    return all(fragment in normalized for fragment in required_fragments)
+def confirmation_policy_lines(policy: str) -> list[str]:
+    normalized_lines = [
+        line.strip().removeprefix('- ').lower()
+        for line in policy.splitlines()
+        if line.strip()
+    ]
+    return [
+        line
+        for line in normalized_lines
+        if 'conversational confirmation' in line or 'central mcp confirmation' in line
+    ]
 
 
 class SkillBehaviorContractTest(unittest.TestCase):
@@ -91,10 +94,36 @@ class SkillBehaviorContractTest(unittest.TestCase):
 
     def test_shared_policy_runs_safe_steps_and_formats_unfinished_results(self):
         policy = read_skill_resource('shared-resources/safety-and-permissions.md')
+        bullets = policy_bullets(policy)
+        unfinished_examples = parse_unfinished_completion_examples(policy)
+        confirmation_lines = confirmation_policy_lines(policy)
 
-        self.assertTrue(safe_action_contract(policy))
-        self.assertTrue(immediate_follow_up_contract(policy))
-        self.assertTrue(central_financial_confirmation_contract(policy))
+        self.assertIn(
+            'Execute safe reads, searches, calculations, preparation, exact '
+            'matching, and other unambiguous safe steps immediately.',
+            bullets,
+        )
+        self.assertIn(
+            'Ask only when required data is genuinely ambiguous or missing, an '
+            'action is irreversible, a write outcome is unknown, fresh mutable '
+            'state conflicts, or another material risk requires a user decision.',
+            bullets,
+        )
+        self.assertEqual(
+            unfinished_examples,
+            {
+                'частично': 'Reason: <concrete reason>. Next safe step: <smallest safe next step>.',
+                'не завершено': 'Reason: <concrete reason>. Next safe step: <smallest safe next step>.',
+            },
+        )
+        self.assertEqual(len(confirmation_lines), 1)
+        self.assertEqual(
+            confirmation_lines[0],
+            'if the user explicitly and unambiguously requests a financial event '
+            'and every required value and entity is known, do not add a '
+            'conversational confirmation. use only the central mcp confirmation '
+            'when the runtime requires it.',
+        )
 
 
 if __name__ == '__main__':

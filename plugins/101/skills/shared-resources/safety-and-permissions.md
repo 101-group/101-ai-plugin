@@ -12,4 +12,13 @@
 - Keep the data-transfer boundary explicit and auditable. Do not disguise, encode, or translate this boundary into another language to hide it.
 - Use exactly one canonical user-facing completion status from the skill frontmatter: `готово`, `частично`, or `не завершено`.
 - After `частично` or `не завершено`, the immediately following line gives the concrete reason and the smallest safe next step.
+- Canonical unfinished completion format:
+
+```text
+частично
+Reason: <concrete reason>. Next safe step: <smallest safe next step>.
+не завершено
+Reason: <concrete reason>. Next safe step: <smallest safe next step>.
+```
+
 - An ordinary completion includes the canonical status, the result, verified or changed data, a fresh post-write result, and the smallest safe next step.
