@@ -22,7 +22,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # Write Preflight
@@ -44,4 +44,4 @@ Receive the explicit user intent, write-tool name, selected entities, baseline s
 
 ## Output
 
-On success, return the tool name, exact payload, fresh values read, and readiness basis to the primary skill. For any missing or ambiguous required part, return `заблокировано`, the exact reason, and the smallest next step. Never substitute values merely to pass API validation.
+On success, return the tool name, exact payload, fresh values read, and readiness basis to the primary skill. For any missing or ambiguous required part, return `не завершено`, the exact reason, and the smallest next step. Never substitute values merely to pass API validation.

@@ -29,7 +29,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # OpenAI Data Analytics in 101

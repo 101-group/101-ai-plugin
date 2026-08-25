@@ -35,7 +35,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # Settlements and Transfers
@@ -66,4 +66,4 @@ For multiple linked transfers, first show a clear plan: recipient, project, amou
 
 Preserve the API receipt after every creation and reread balances after a series. On an error or uncertain outcome, do not claim creation and do not retry automatically.
 
-Finish with `готово`, `частично`, or `заблокировано`, list created and not-created events by human name, show the fresh balance, and give the smallest next step.
+Use the canonical completion contract from `safety-and-permissions.md`; list created and not-created events by human name, show the fresh balance, and give the smallest next step.

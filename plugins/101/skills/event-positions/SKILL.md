@@ -27,7 +27,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # Event Position Preparation

@@ -26,7 +26,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # Entity Resolution

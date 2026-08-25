@@ -38,7 +38,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # Estimate Management
@@ -68,4 +68,4 @@ A bulk request is a sequence of individual `create_estimate` calls, not a new ba
 
 Preserve an API receipt for every successful call. On continuation, skip proven created items, recheck proven not-started items, and first compare server state for an unknown outcome. Never retry an unknown write automatically.
 
-Finish with `готово`, `частично`, or `заблокировано`; list created, not created, and not started estimates by human name, show fresh data, and give the smallest next step.
+Use the canonical completion contract from `safety-and-permissions.md`; list created, not created, and not started estimates by human name, show fresh data, and give the smallest next step.

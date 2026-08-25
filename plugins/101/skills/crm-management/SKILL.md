@@ -52,7 +52,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # CRM Management
@@ -85,4 +85,4 @@ Do not create tools for pipeline members, field value builders/deletion, CRM pag
 
 ## Completion
 
-Return `готово`, `частично`, or `заблокировано`; name the pipeline, stage, deal, or rule in human terms, list verified or changed data, include the API result, and provide the smallest next step.
+Use the canonical completion contract from `safety-and-permissions.md`; name the pipeline, stage, deal, or rule in human terms, list verified or changed data, include the API result, and provide the smallest next step.

@@ -464,10 +464,16 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
         self.assertIn('`is_owner=true`', import_skill.lower())
         self.assertIn('separately installed Spreadsheets skill', import_rules)
         self.assertIn('data-import', index)
-        self.assertIn('offer the technical integrity audit', analytics.lower())
+        self.assertIn(
+            'run the technical integrity audit immediately before a full company '
+            'financial analysis',
+            analytics.lower(),
+        )
         self.assertIn('full company financial analysis', analytics.lower())
         self.assertIn('professional cash flow', analytics.lower())
-        self.assertIn('technical integrity was not checked', analytics.lower())
+        self.assertIn('do not add the audit to a narrow request', analytics.lower())
+        self.assertNotIn('offer the technical integrity audit', analytics.lower())
+        self.assertNotIn('technical integrity was not checked', analytics.lower())
         for source in (analytics, charts):
             self.assertIn('chart-specific finding', source)
             self.assertIn('chart-specific recommendation', source)
@@ -499,7 +505,7 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
             'Собственные средства проекта',
             'Собственные средства фонда компании',
             'готово',
-            'заблокировано',
+            'не завершено',
             'частично',
         }
         published_files = sorted(
@@ -520,7 +526,7 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
                 if without_literals.strip() in {
                     '- готово',
                     '- частично',
-                    '- заблокировано',
+                    '- не завершено',
                 }:
                     continue
                 if cyrillic.search(without_literals):
@@ -530,6 +536,7 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
 
     def test_financial_audit_active_bodies_and_resources_are_english(self):
         cyrillic = re.compile(r'[А-Яа-яЁё]')
+        allowed_literals = ('`готово`', '`частично`', '`не завершено`')
 
         for relative_path in ENGLISH_FINANCIAL_AUDIT_FILES:
             path = SKILLS / relative_path
@@ -537,6 +544,8 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
             source = path.read_text(encoding='utf-8')
             if path.name == 'SKILL.md':
                 source = source.split('---', 2)[2]
+            for literal in allowed_literals:
+                source = source.replace(literal, '')
             self.assertIsNone(cyrillic.search(source), relative_path)
 
     def test_fund_reads_and_legacy_tools_remain_available(self):
