@@ -1,7 +1,7 @@
 # 101 skills: status and optimization audit
 
 Date: 2026-08-25
-Release candidate: public Marketplace plugin `2.2.2`
+Release candidate: public Marketplace plugin `2.2.3` (the `2.2.2` behavior candidate plus removal of one accidentally tracked SDD report)
 
 ## Scope and method
 
