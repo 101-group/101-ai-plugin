@@ -347,10 +347,10 @@ class PresentationRoutingContractTest(unittest.TestCase):
         contract = read_json(ROUTING_CONTRACT)
         self.routes = {route['id']: route for route in contract['routes']}
 
-    def test_russian_project_list_mounts_the_existing_projects_widget(self):
+    def test_project_list_mounts_the_existing_projects_widget(self):
         route = self.routes['project_list']
 
-        self.assertIn('выведи список проектов', route['examples'])
+        self.assertIn('show the project list', route['examples'])
         self.assertEqual(route['tools'], ['list_projects', 'show_result'])
         self.assertEqual(route['widget']['kind'], 'projects')
         self.assertEqual(route['widget']['resourceUri'], 'ui://101/widget/app-2.0.7.html')
@@ -407,10 +407,10 @@ class PresentationRoutingContractTest(unittest.TestCase):
         self.assertIn('clickable Markdown link', index)
         self.assertIn('Do not retry the original billed MCP call', index)
 
-    def test_russian_event_list_mounts_the_existing_events_widget(self):
+    def test_event_list_mounts_the_existing_events_widget(self):
         route = self.routes['event_list']
 
-        self.assertIn('выведи список событий', route['examples'])
+        self.assertIn('show the event list', route['examples'])
         self.assertEqual(route['tools'], ['list_events', 'show_result'])
         self.assertEqual(route['widget']['kind'], 'events')
         self.assertEqual(route['widget']['resourceUri'], 'ui://101/widget/app-2.0.7.html')
@@ -418,7 +418,7 @@ class PresentationRoutingContractTest(unittest.TestCase):
     def test_task_detail_routes_to_the_shared_application_widget(self):
         route = self.routes['task_detail']
 
-        self.assertIn('открой задачу', route['examples'])
+        self.assertIn('open the task', route['examples'])
         self.assertEqual(route['tools'], ['get_task', 'show_result'])
         self.assertEqual(route['widget']['kind'], 'task_detail')
         self.assertEqual(
@@ -474,16 +474,49 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
             self.assertIn('overall audit conclusion', source)
             self.assertIn('general recommendations', source)
 
-    def test_all_published_skill_markdown_uses_english_prose(self):
+    def test_all_published_skill_files_use_english_prose_except_product_literals(self):
         cyrillic = re.compile(r'[А-Яа-яЁё]')
+        allowed_literals = {
+            'Агентское вознаграждение',
+            'Из проекта в фонд компании',
+            'Из фонда компании в проект',
+            'Оплата или аванс в Фонде компании',
+            'Оплата или аванс по проекту',
+            'Отчёт',
+            'Отчёт по проекту',
+            'Отчёт фонда компании',
+            'Перевод из Фонда компании в проект',
+            'Перевод из проекта в Фонд компании',
+            'Перевод подотчетных средств в Фонде компании',
+            'Перевод подотчетных средств по проекту',
+            'Подотчётные средства проекта',
+            'Подотчётные средства фонда компании',
+            'Поступление в фонд компании',
+            'Поступление по проекту',
+            'Смета',
+            'Смета по проекту',
+            'Смета фонда компании',
+            'Собственные средства проекта',
+            'Собственные средства фонда компании',
+            'готово',
+            'заблокировано',
+            'частично',
+        }
+        published_files = sorted(
+            path
+            for suffix in ('*.md', '*.json', '*.yaml')
+            for path in SKILLS.rglob(suffix)
+        )
         offenders = []
 
-        for path in sorted(SKILLS.rglob('*.md')):
+        for path in published_files:
             for line_number, line in enumerate(
                 path.read_text(encoding='utf-8').splitlines(),
                 start=1,
             ):
-                without_literals = re.sub(r'`[^`]*`', '', line)
+                without_literals = line
+                for literal in allowed_literals:
+                    without_literals = without_literals.replace(f'`{literal}`', '')
                 if without_literals.strip() in {
                     '- готово',
                     '- частично',

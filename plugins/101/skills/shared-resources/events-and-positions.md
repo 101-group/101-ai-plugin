@@ -20,7 +20,7 @@
 | `project_estimate` | `Смета по проекту` | `Смета по проекту` |
 | `company_estimate` | `Смета фонда компании` | `Смета фонда компании` |
 
-- Example wording for a write: `Создаю перевод типа «Оплата или аванс по проекту»`. Do not say `Создаю перевод типа «Собственные средства проекта»`: that is the filter-category label.
+- Example wording for a write: create a transfer of type `Оплата или аванс по проекту`. Do not call it type `Собственные средства проекта`: that is the filter-category label.
 - `Отчёт` uses the existing expense contract, and `Смета` uses the existing estimate contract. Do not create an MCP-only event type.
 - The customer price of an expense report may be zero while the contractor amount is nonzero. This is an expense not charged to the customer and therefore a project loss; allocation distributes that loss among participants as profit with the opposite sign.
 - A position may come from a price list, an existing estimate, or manual input. Preserve its source through the current API contract.
