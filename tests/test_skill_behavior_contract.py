@@ -1,8 +1,8 @@
 import re
+import subprocess
+import sys
 import unittest
 from pathlib import Path
-
-import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,6 +45,14 @@ EXPECTED_SHARED_RESOURCES = {
     'shared-resources/wiki-content-and-files.md',
 }
 
+ALLOWED_RESOURCE_KINDS = {
+    'error-recovery-contract',
+    'payload-example',
+    'routing-contract',
+    'semantic-guide',
+    'token-snapshot',
+}
+
 
 def skill_paths() -> list[Path]:
     return sorted(SKILLS.glob('*/SKILL.md'))
@@ -54,19 +62,120 @@ def shared_resource_paths() -> list[Path]:
     return sorted((SKILLS / 'shared-resources').glob('*.md'))
 
 
+def parse_yaml_scalar(value: str):
+    if value == '[]':
+        return []
+    if value == 'true':
+        return True
+    if value == 'false':
+        return False
+    if value in {'null', '~'}:
+        return None
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        return value[1:-1]
+    return value
+
+
+def indentation(line: str) -> int:
+    return len(line) - len(line.lstrip(' '))
+
+
+def parse_yaml_subset(lines: list[str], start: int, indent: int):
+    if start >= len(lines) or indentation(lines[start]) != indent:
+        raise ValueError('invalid YAML indentation')
+
+    is_list = lines[start].lstrip(' ').startswith('- ')
+    value = [] if is_list else {}
+    index = start
+
+    while index < len(lines):
+        line = lines[index]
+        if not line.strip():
+            index += 1
+            continue
+        current_indent = indentation(line)
+        if current_indent < indent:
+            break
+        if current_indent > indent:
+            raise ValueError(f'unexpected YAML indentation: {line}')
+        stripped = line.strip()
+
+        if is_list:
+            if not stripped.startswith('- '):
+                raise ValueError(f'mixed YAML list and mapping: {line}')
+            item = stripped[2:]
+            if ': ' not in item and not item.endswith(':'):
+                value.append(parse_yaml_scalar(item))
+                index += 1
+                continue
+
+            key, raw_value = item.split(':', 1)
+            mapping = {}
+            raw_value = raw_value.strip()
+            index += 1
+            if raw_value:
+                mapping[key] = parse_yaml_scalar(raw_value)
+            elif index < len(lines) and indentation(lines[index]) > indent:
+                nested_indent = indentation(lines[index])
+                mapping[key], index = parse_yaml_subset(lines, index, nested_indent)
+            else:
+                mapping[key] = None
+
+            while index < len(lines):
+                continuation = lines[index]
+                if not continuation.strip():
+                    index += 1
+                    continue
+                if indentation(continuation) <= indent:
+                    break
+                if indentation(continuation) != indent + 2:
+                    raise ValueError(f'invalid YAML mapping indentation: {continuation}')
+                item_key, item_value = continuation.strip().split(':', 1)
+                item_value = item_value.strip()
+                index += 1
+                if item_value:
+                    mapping[item_key] = parse_yaml_scalar(item_value)
+                elif index < len(lines) and indentation(lines[index]) > indent + 2:
+                    nested_indent = indentation(lines[index])
+                    mapping[item_key], index = parse_yaml_subset(
+                        lines,
+                        index,
+                        nested_indent,
+                    )
+                else:
+                    mapping[item_key] = None
+            value.append(mapping)
+            continue
+
+        if ':' not in stripped:
+            raise ValueError(f'invalid YAML mapping entry: {line}')
+        key, raw_value = stripped.split(':', 1)
+        raw_value = raw_value.strip()
+        index += 1
+        if raw_value:
+            value[key] = parse_yaml_scalar(raw_value)
+        elif index < len(lines) and lines[index].strip():
+            nested_indent = indentation(lines[index])
+            if nested_indent <= indent:
+                value[key] = None
+            else:
+                value[key], index = parse_yaml_subset(lines, index, nested_indent)
+        else:
+            value[key] = None
+    return value, index
+
+
 def frontmatter_data(skill_path: Path) -> dict:
     parts = skill_path.read_text(encoding='utf-8').split('---', 2)
     if len(parts) != 3 or parts[0].strip():
         raise AssertionError(f'valid frontmatter missing in {skill_path}')
 
-    data = yaml.safe_load(parts[1])
+    data, index = parse_yaml_subset(parts[1].splitlines(), 0, 0)
+    if index != len(parts[1].splitlines()):
+        raise AssertionError(f'unparsed frontmatter in {skill_path}')
     if not isinstance(data, dict):
         raise AssertionError(f'frontmatter is not a mapping in {skill_path}')
     return data
-
-
-def read_frontmatter(skill_path: Path) -> str:
-    return skill_path.read_text(encoding='utf-8').split('---', 2)[1]
 
 
 def frontmatter_list(skill_path: Path, key: str) -> tuple[str, ...]:
@@ -140,6 +249,13 @@ def optional_tools(skill_path: Path) -> tuple[str, ...]:
     return frontmatter_list(skill_path, 'optional_tools')
 
 
+def skill_body(skill_path: Path) -> str:
+    parts = skill_path.read_text(encoding='utf-8').split('---', 2)
+    if len(parts) != 3 or parts[0].strip():
+        raise AssertionError(f'valid frontmatter missing in {skill_path}')
+    return parts[2]
+
+
 def relative_to_skills(path: Path) -> str | None:
     try:
         return path.resolve().relative_to(SKILLS.resolve()).as_posix()
@@ -162,7 +278,7 @@ def dependency_graph_errors() -> list[str]:
     for path in paths:
         try:
             data = frontmatter_data(path)
-        except (AssertionError, yaml.YAMLError) as error:
+        except (AssertionError, ValueError) as error:
             errors.append(str(error))
             continue
         frontmatters[path.parent.name] = data
@@ -226,7 +342,7 @@ def resource_link_errors() -> list[str]:
     for skill_path in skill_paths():
         try:
             resources = frontmatter_data(skill_path).get('resources')
-        except (AssertionError, yaml.YAMLError) as error:
+        except (AssertionError, ValueError) as error:
             errors.append(str(error))
             continue
         if not isinstance(resources, list):
@@ -254,15 +370,142 @@ def resource_link_errors() -> list[str]:
     return errors
 
 
+def resource_contract_errors() -> list[str]:
+    errors = []
+    for skill_path in skill_paths():
+        try:
+            resources = frontmatter_data(skill_path).get('resources')
+        except (AssertionError, ValueError) as error:
+            errors.append(str(error))
+            continue
+        if not isinstance(resources, list):
+            errors.append(f'{skill_path.parent.name}: resources must be a YAML list')
+            continue
+        for resource in resources:
+            if not isinstance(resource, dict):
+                errors.append(f'{skill_path.parent.name}: invalid resource declaration')
+                continue
+            if resource.get('required') is not True:
+                errors.append(
+                    f'{skill_path.parent.name}: resource must declare required: true'
+                )
+            if resource.get('kind') not in ALLOWED_RESOURCE_KINDS:
+                errors.append(
+                    f'{skill_path.parent.name}: invalid resource kind '
+                    f'{resource.get("kind")!r}'
+                )
+    return errors
+
+
+def public_completion_contract_errors() -> list[str]:
+    errors = []
+    policy = read_skill_resource('shared-resources/safety-and-permissions.md')
+    template = (
+        'частично',
+        'Reason: <concrete reason>. Next safe step: <smallest safe next step>.',
+        'не завершено',
+        'Reason: <concrete reason>. Next safe step: <smallest safe next step>.',
+    )
+    policy_lines = tuple(policy.splitlines())
+    if not any(
+        policy_lines[index:index + len(template)] == template
+        for index in range(len(policy_lines) - len(template) + 1)
+    ):
+        errors.append('canonical unfinished completion template is missing')
+
+    index_data = frontmatter_data(SKILLS / '101-index/SKILL.md')
+    if not any(
+        resource.get('path') == '../shared-resources/safety-and-permissions.md'
+        for resource in index_data.get('resources', [])
+        if isinstance(resource, dict)
+    ):
+        errors.append('dispatcher cannot reach the central completion policy')
+    if 'All workflows must obey `safety-and-permissions.md`' not in skill_body(
+        SKILLS / '101-index/SKILL.md'
+    ):
+        errors.append('dispatcher does not assign central completion policy')
+
+    for skill_path in skill_paths():
+        if completion_statuses(skill_path) != USER_COMPLETION_STATUSES:
+            errors.append(f'{skill_path.parent.name}: invalid completion statuses')
+        if 'заблокировано' in skill_body(skill_path):
+            errors.append(f'{skill_path.parent.name}: user-facing заблокировано')
+
+    analytics = skill_body(SKILLS / 'analytics-visualization/SKILL.md')
+    chart_design = read_skill_resource(
+        'analytics-visualization/references/chart-design.md'
+    )
+    if '`snapshot.status` uses only `ready|partial|blocked|fixture`' not in analytics:
+        errors.append('analytics technical blocked contract changed')
+    if '`ready|partial|blocked|fixture` are the only statuses.' not in chart_design:
+        errors.append('chart technical blocked contract changed')
+    return errors
+
+
 class SkillBehaviorContractTest(unittest.TestCase):
     def test_all_dependencies_and_resources_resolve(self):
         self.assertEqual(dependency_graph_errors(), [])
         self.assertEqual(resource_link_errors(), [])
 
+    def test_resource_declarations_are_required_and_use_allowed_kinds(self):
+        self.assertEqual(resource_contract_errors(), [])
+
+    def test_all_public_skill_bodies_keep_the_completion_boundary(self):
+        self.assertEqual(public_completion_contract_errors(), [])
+
+    def test_frontmatter_contract_runs_without_site_packages(self):
+        result = subprocess.run(
+            [
+                sys.executable,
+                '-S',
+                '-m',
+                'unittest',
+                'tests.test_skill_behavior_contract.SkillBehaviorContractTest.'
+                'test_all_dependencies_and_resources_resolve',
+                'tests.test_skill_behavior_contract.SkillBehaviorContractTest.'
+                'test_every_skill_uses_the_user_completion_contract',
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_yaml_frontmatter_preserves_inline_empty_lists(self):
         analytics_path = SKILLS / 'analytics-visualization/SKILL.md'
         self.assertEqual(depends_on(analytics_path), ())
         self.assertEqual(optional_tools(analytics_path), ())
+
+    def test_stdlib_parser_supports_block_maps_lists_and_inline_empty_lists(self):
+        parsed, index = parse_yaml_subset(
+            [
+                'depends_on: []',
+                'resources:',
+                '  - path: ../shared-resources/safety-and-permissions.md',
+                '    kind: semantic-guide',
+                '    required: true',
+                'completion:',
+                '  statuses:',
+                '    - готово',
+                '    - не завершено',
+            ],
+            0,
+            0,
+        )
+        self.assertEqual(index, 9)
+        self.assertEqual(parsed['depends_on'], [])
+        self.assertEqual(
+            parsed['resources'],
+            [
+                {
+                    'path': '../shared-resources/safety-and-permissions.md',
+                    'kind': 'semantic-guide',
+                    'required': True,
+                }
+            ],
+        )
+        self.assertEqual(parsed['completion']['statuses'], ['готово', 'не завершено'])
 
     def test_every_skill_uses_the_user_completion_contract(self):
         paths = skill_paths()

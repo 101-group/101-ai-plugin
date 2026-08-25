@@ -8,9 +8,10 @@ Release candidate: public Marketplace plugin `2.2.2`
 The audit read the complete bodies and YAML frontmatter of all 16 public
 `SKILL.md` files, all nine files in `shared-resources/`, and the two linked
 Markdown references that are included by the size measurement. Every declared
-dependency and resource was parsed as YAML, rather than inferred from a
-line-oriented regular expression. This matters because the plugin uses valid
-inline empty lists such as `depends_on: []` and `optional_tools: []`.
+dependency and resource is parsed by a stdlib-only parser for the actual YAML
+subset: block maps, block lists, booleans, quoted scalars, and inline empty
+lists. This matters because the plugin uses valid inline lists such as
+`depends_on: []` and `optional_tools: []`.
 
 The automated inventory is deliberately exact: it expects all 16 skill names
 and all nine shared-resource paths. A new skill or shared resource therefore
@@ -37,8 +38,8 @@ user-facing completion status.
 The parsed graph contains 16 named nodes and 25 dependency edges. Every edge
 resolves to one of those nodes, no skill depends on itself, and depth-first
 cycle detection found no cycle. The resource audit found 49 declared resource
-links; all are marked required, resolve to a file, and remain within
-`plugins/101/skills/`.
+links; every one declares `required: true`, uses an allowed resource kind,
+resolves to a file, and remains within `plugins/101/skills/`.
 
 Notable dependency boundaries after the audit:
 
@@ -104,8 +105,61 @@ saving is claimed.
 
 ## Exact size measurement
 
-Measurement command: `find plugins/101/skills -name '*.md' -type f -print0 |
-xargs -0 wc -w` and the same command with `wc -l`.
+The authoritative baseline is commit
+`9f06171e54a25aab02c355e1e802ca3a1e02dd06` (`origin/main`, `v2.2.1`, before
+Tasks 1–3). Both measurements use exactly these 27 Markdown paths; the command
+below also verifies that base and current path sets have zero differences.
+
+```text
+plugins/101/skills/101-index/SKILL.md
+plugins/101/skills/analytics-visualization/SKILL.md
+plugins/101/skills/analytics-visualization/references/chart-design.md
+plugins/101/skills/company-analytics/SKILL.md
+plugins/101/skills/crm-management/SKILL.md
+plugins/101/skills/crm-management/references/crm-orchestration.md
+plugins/101/skills/data-import/SKILL.md
+plugins/101/skills/entity-resolution/SKILL.md
+plugins/101/skills/estimate-management/SKILL.md
+plugins/101/skills/event-positions/SKILL.md
+plugins/101/skills/file-handling/SKILL.md
+plugins/101/skills/financial-account-audit/SKILL.md
+plugins/101/skills/project-management/SKILL.md
+plugins/101/skills/report-management/SKILL.md
+plugins/101/skills/settlements-and-transfers/SKILL.md
+plugins/101/skills/shared-resources/context-and-identity.md
+plugins/101/skills/shared-resources/data-import-rules.md
+plugins/101/skills/shared-resources/events-and-positions.md
+plugins/101/skills/shared-resources/finance-and-balances.md
+plugins/101/skills/shared-resources/financial-risks-and-project-controls.md
+plugins/101/skills/shared-resources/management-reporting-and-balances.md
+plugins/101/skills/shared-resources/safety-and-permissions.md
+plugins/101/skills/shared-resources/technical-integrity-audit.md
+plugins/101/skills/shared-resources/wiki-content-and-files.md
+plugins/101/skills/task-management/SKILL.md
+plugins/101/skills/wiki-management/SKILL.md
+plugins/101/skills/write-preflight/SKILL.md
+```
+
+Run from the repository root:
+
+```sh
+BASE=9f06171e54a25aab02c355e1e802ca3a1e02dd06
+git ls-tree -r --name-only "$BASE" -- plugins/101/skills | awk '/\.md$/' |
+  while IFS= read -r file; do git show "$BASE:$file"; done | wc -w
+git ls-tree -r --name-only "$BASE" -- plugins/101/skills | awk '/\.md$/' |
+  while IFS= read -r file; do git show "$BASE:$file"; done | wc -l
+find plugins/101/skills -type f -name '*.md' -print0 | sort -z |
+  xargs -0 cat | wc -w
+find plugins/101/skills -type f -name '*.md' -print0 | sort -z |
+  xargs -0 cat | wc -l
+comm -3 \
+  <(git ls-tree -r --name-only "$BASE" -- plugins/101/skills | awk '/\.md$/' | sort) \
+  <(find plugins/101/skills -type f -name '*.md' | sort)
+```
+
+Observed output: `14679`, `1632`, `14722`, `1637`, followed by no output from
+`comm -3`. Thus both sides contain 27 Markdown files and the final delta is
+exactly `+43` words and `+5` lines.
 
 | Measurement | Baseline | Final | Delta |
 | --- | ---: | ---: | ---: |
@@ -130,6 +184,24 @@ After changing only the public release references in the manifest and README,
 the same focused suite passed. The final full-suite, archive-mirror, and
 whitespace results are recorded in the Task 3 implementer report after the
 archive rebuild.
+
+## Stdlib parser and public-boundary regression proof
+
+The graph/status tests now run under `python3 -S`, so no undeclared site-package
+dependency is needed. The parser has direct coverage for block mappings, block
+lists, boolean `required: true`, and inline empty lists. The resource graph also
+checks the allowed kind set: `semantic-guide`, `routing-contract`,
+`error-recovery-contract`, `token-snapshot`, and `payload-example`.
+
+The public completion test examines all 16 skill bodies, rejects the Russian
+user-facing `заблокировано`, requires the exact frontmatter triplet, and
+physically checks the two-line unfinished result template in the central safety
+resource. The dispatcher declares that resource and assigns it to all
+workflows. The separate technical contracts remain exact in analytics and its
+chart reference: `ready|partial|blocked|fixture`.
+
+The canonical skills archive contains 48 regular files. This is a regular-file
+count, not a claim about ZIP directory entries.
 
 ## Independent behavioral boundary review
 
