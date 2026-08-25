@@ -1,6 +1,6 @@
 # Technical Integrity Audit
 
-This audit checks only structural and arithmetic integrity. It is a mandatory gate before a general company audit and does not run automatically before a narrow request.
+This audit checks only structural and arithmetic integrity. Offer it briefly before a full company financial analysis, including professional cash flow, P&L/income statement, EBITDA, or management balance work, and run it only after the user agrees. Do not offer or run it automatically before a narrow request.
 
 ## Complete reads
 
@@ -30,9 +30,9 @@ A missing project on a fund-only event is not an error. An identifier without a 
 - Every required distribution must total exactly 100%.
 - A report total must equal the sum of its positions.
 
-## Gate result
+## Check result
 
-Any structural or arithmetic error blocks the general financial audit until it is corrected. Return a list containing the affected event or entity, the broken rule, and a correction recommendation. Change nothing automatically.
+When the user accepted this check, any structural or arithmetic error stops the following full financial analysis until it is corrected. Return a list containing the affected event or entity, the broken rule, and a correction recommendation. Change nothing automatically.
 
 Unconfirmed operations, probable duplicates, and semantically generic counterparty names are not technical-audit failures. Evaluate them later as financial warnings.
 

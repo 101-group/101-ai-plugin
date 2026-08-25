@@ -29,15 +29,15 @@ completion:
     - заблокировано
 ---
 
-# Разрешение сущностей
+# Entity Resolution
 
-Этот helper не владеет пользовательской целью. Получи от главного скилла тип сущности, человеческое описание и уже закреплённый контекст.
+This helper does not own the user's goal. Receive the entity type, human description, and already fixed context from the primary skill.
 
-1. Начни с `whoami`, если пользователь и компания ещё не известны.
-2. Используй самый узкий существующий search/list инструмент и серверные фильтры.
-3. Если найдено единственное точное совпадение, верни его главному скиллу автоматически.
-4. Если совпадений несколько, останови зависимую операцию и покажи один компактный список понятных названий с достаточным контекстом для выбора.
-5. Не угадывай по частичному совпадению и не выбирай первый результат только из-за порядка выдачи.
-6. Не показывай GUID в обычном ответе. Сохрани его как техническую ссылку в контексте и evidence ledger.
+1. Start with `whoami` when the user or company is not yet known.
+2. Use the narrowest existing search/list tool and server-side filters.
+3. Return one exact match to the primary skill automatically.
+4. When multiple matches exist, stop the dependent operation and show one compact list of understandable names with enough context for a choice.
+5. Never guess from a partial match or select the first result merely because of result order.
+6. Do not expose a GUID in an ordinary answer. Keep it only as a technical reference in context and the evidence ledger.
 
-Если доступ или поиск не позволяют доказать однозначность, верни точный блокер и минимальный следующий вопрос. Не подменяй отсутствующую сущность догадкой.
+When access or search cannot prove a unique match, return the exact blocker and the smallest next question. Never replace a missing entity with a guess.

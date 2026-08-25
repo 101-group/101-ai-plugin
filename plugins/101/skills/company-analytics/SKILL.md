@@ -1,7 +1,7 @@
 ---
 name: company-analytics
 description: Use when the user requests source-backed company or project analytics, financial statements, useful charts, or a general 101 audit.
-version: "2.1.0"
+version: "2.2.0"
 role: primary
 invocation: internal
 intents:
@@ -72,11 +72,13 @@ Work read-only against the known 101 contract. Do not rediscover the database or
 - Give a non-professional user an ordinary management overview from the same data. Change the presentation, not the evidence.
 - If a standard metric cannot be calculated honestly, name the available management analogue, show its formula, and state its limitations.
 
-## General company audit gate
+## Optional technical integrity check
 
-The technical integrity audit is mandatory only before a general company audit. Do not run it before a narrow request about one project, counterparty, expense class, or metric.
+Before a full company financial analysis, briefly explain the value of structural and arithmetic validation and offer the technical integrity audit. This includes a general audit, a full management overview, and professional cash flow, P&L/income statement, EBITDA, or management balance work. Do not start technical reads before the user agrees. Do not make this offer before a narrow request about one project, counterparty, expense class, or metric.
 
-For a general company audit, read `technical-integrity-audit.md` and fully read all event pages plus every necessary event detail. If a page, detail, structural link, distribution, or arithmetic check fails, stop the general financial audit. Return the issues and recommendations without changing data.
+If the user agrees, read `technical-integrity-audit.md`, fully read all event pages plus every necessary event detail, and apply its blocking rules. If a page, detail, structural link, distribution, or arithmetic check fails, stop the general financial analysis and return the issues and recommendations without changing data.
+
+If the user declines, continue the financial analysis immediately from the available data. State in the result that technical integrity was not checked, so the conclusions may inherit errors in the underlying records.
 
 After the gate passes, read only the references required by the selected mode:
 
@@ -90,7 +92,7 @@ For a superficial general audit, show a short company/fund overview and the proj
 1. Use the fixed company. Call `whoami` and `entity-resolution` only when context is missing or ambiguous.
 2. Use `get_company_closing_balance` for the current management settlement balance, following `management-reporting-and-balances.md`.
 3. Use `list_projects` for the project portfolio and drill into only the metric needed for the goal. Call `list_project_members` only together with `get_project_fund_settlements` for the same `project_guid`; use `finance-and-balances.md` for signs, successful zeros, and partial results.
-4. For ordinary aggregate metrics, use `list_events` with `with_totals=true`, `per_page=0`, exact `company_guid`, period, and `status=[partner_verified, client_accepted]`. Do not export raw events when `totals` or `balanceTotals` answers the question. Full event pagination is required only for the technical integrity gate of a general company audit.
+4. For ordinary aggregate metrics, use `list_events` with `with_totals=true`, `per_page=0`, exact `company_guid`, period, and `status=[partner_verified, client_accepted]`. Do not export raw events when `totals` or `balanceTotals` answers the question. Full event pagination is required only when the user accepts the optional technical integrity check before a full company financial analysis.
 5. For a time series, split the period into non-overlapping intervals and make one aggregate call per interval. Use the requested grain; otherwise choose the coarsest honest grain with at most 12 intervals. Use the requested time zone, defaulting to Europe/Moscow.
 6. Never mix confirmed and unconfirmed events. Keep drafts outside the primary totals and offer a separate impact scenario.
 
@@ -103,6 +105,8 @@ Compare like units, periods, signs, and grains. Call a movement a cause only wit
 Read `analytics-visualization` only after the mode gate allows visualization. One `render_chart` serves a focused standalone chart. A broader audit uses one composite artifact; do not split one audit into independent `render_chart` calls.
 
 Adapt the number and type of charts to the question and the available honest data. Include only useful charts; no fixed chart count is a success criterion. Pass bounded aggregated datasets and truthful `source`/`manifest.sources[]` metadata with strict `executedAt` and safe filters from the actual MCP call, without GUIDs. Call one `validate_artifact` and, on success, pass the unchanged payload to one `render_artifact`. Do not repeat a successful presentation call.
+
+Immediately after each audit chart, add a short chart-specific finding and a concrete chart-specific recommendation grounded in that chart's data. After all charts, add a separate overall audit conclusion and separate general recommendations, including useful follow-up checks and directions for deeper analysis. Local chart guidance and the overall blocks are both required and do not replace each other.
 
 Local changes to chart type, grouping, filters over already loaded rows, layout, labels, or table mode run inside the React runtime without a new MCP call. A new company, period, metric, or dataset requires a new business fetch, snapshot, and validation.
 

@@ -12,6 +12,48 @@
         "type": "markdown",
         "layout": "full",
         "body": "## Limitation\n\nThe calculation includes only available confirmed events."
+      },
+      {
+        "id": "profit_chart_block",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "profit_by_month"
+      },
+      {
+        "id": "profit_chart_guidance",
+        "type": "markdown",
+        "layout": "full",
+        "body": "### Chart-specific finding\n\nAvailable confirmed events show profit of 100 in August 2026, but the incomplete event set limits confidence.\n\n### Chart-specific recommendation\n\nResolve the pending project events, then rerun this monthly profit view before making a profit decision."
+      },
+      {
+        "id": "overall_audit_conclusion",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Overall audit conclusion\n\nThe available confirmed records are insufficient for a complete financial conclusion."
+      },
+      {
+        "id": "general_recommendations",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## General recommendations\n\nConfirm or resolve the missing events, repeat the audit, and deepen the analysis by project and counterparty if the complete result still shows risk."
+      }
+    ],
+    "charts": [
+      {
+        "id": "profit_by_month",
+        "title": "Confirmed profit by month",
+        "type": "bar",
+        "dataset": "events",
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "temporal"
+          },
+          "y": {
+            "field": "profit",
+            "type": "quantitative"
+          }
+        }
       }
     ],
     "sources": [

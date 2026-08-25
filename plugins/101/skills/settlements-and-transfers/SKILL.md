@@ -38,33 +38,32 @@ completion:
     - заблокировано
 ---
 
-# Расчёты и переводы
+# Settlements and Transfers
 
-Используй этот skill только для прямого запроса на действие: «рассчитай Петю», «переведи деньги», «закрой долг». Не запускай его для общего финансового аудита.
+Use this skill only for a direct action request such as “settle Alex,” “transfer money,” or “close the debt.” Do not run it for a general financial audit.
 
-## До предложения действия
+## Before proposing an action
 
-1. Определи пользователя и доступ через `whoami`.
-2. Найди участника и проект. Если имя или проект неоднозначны, покажи варианты и попроси выбрать; не угадывай.
-3. Прочитай подтверждённые балансы участника на выбранном проекте. Разделяй собственный и подотчётный баланс.
-   `list_project_members` вызывай только парой с `get_project_fund_settlements` для того же `project_guid`; правила знака, нулей и частичного ответа бери из `finance-and-balances.md`.
-4. Если обязательных данных события нет, задай точный вопрос. Не создавай черновик и не подставляй значения.
-5. Перед созданием примени `write-preflight`: проверь актуальную схему create-инструмента и используй исходный API-контракт, camelCase-поля, обязательные данные и `fileList` при наличии вложений.
+1. Resolve the user and access through `whoami`.
+2. Find the participant and project. If either is ambiguous, show options and ask the user to choose; never guess.
+3. Read confirmed participant balances on the selected project. Keep own and accountable balances separate. Call `list_project_members` only together with `get_project_fund_settlements` for the same `project_guid`; follow `finance-and-balances.md` for signs, zeros, and partial results.
+4. Ask a precise question when required event data is missing. Do not create a draft or substitute values.
+5. Before creation, apply `write-preflight`: check the current create-tool schema and use the original API contract, camelCase fields, required data, and `fileList` when attachments exist.
 
-## Как предлагать расчёт участника
+## Proposing a participant settlement
 
-- При отрицательном собственном балансе предложи внешний перевод на сумму, которую нужно выплатить участнику.
-- При отрицательном подотчётном балансе предложи отдельный перевод в подотчёт.
-- Если отрицательны оба баланса, покажи оба перевода отдельными строками, но попроси одно явное подтверждение на всю связку.
-- Если у участника есть положительный подотчёт и собственный минус, рассчитай доступное самопокрытие. Объясни, сколько участник должен перевести себе из подотчёта; пользователю предложи создать только внешний перевод на остаток. Не создавай самоперевод за другого участника.
-- Если денег проекта недостаточно для внешнего перевода, не блокируй действие. Предупреди, что выплата создаст или усилит дефицит; после явного подтверждения её можно создать. Затем прямо порекомендуй получить деньги от заказчика. Запрос денег в системе не создавай: такого API нет.
+- For a negative own balance, propose an external transfer for the amount owed to the participant.
+- For a negative accountable balance, propose a separate accountable transfer.
+- When both are negative, show two separate transfers but request one explicit confirmation for the linked pair.
+- When accountable balance is positive and own balance is negative, calculate available self-coverage. Explain the amount the participant should transfer internally, and propose only the remaining external transfer. Do not create a self-transfer for another participant.
+- Insufficient project cash does not automatically block an external transfer. Warn that it creates or increases a deficit, require explicit confirmation, then recommend collecting money from the customer. Do not create a collection request because no such API exists.
 
-## План и создание
+## Plan and create
 
-Read-only рекомендация не является разрешением на запись. Начинай создание только после явной команды пользователя на действие.
+A read-only recommendation is not write authorization. Start creation only after an explicit action instruction.
 
-Для нескольких связанных переводов сначала покажи понятный план: кому, по какому проекту, на какие суммы, какие балансы он закрывает и какое последствие будет у дефицита. После успешного `write-preflight` выполняй одиночные API-вызовы последовательно. Применяй только центральную MCP policy подтверждения; не вводи собственное подтверждение поверх неё и не обходи штатный confirmation-поток.
+For multiple linked transfers, first show a clear plan: recipient, project, amounts, balances closed, and deficit consequence. After successful `write-preflight`, make sequential individual API calls. Use only central MCP confirmation policy; do not add another layer or bypass the standard flow.
 
-После каждого создания сохрани API-квитанцию. После серии перечитай обновлённые балансы. Если инструмент вернул ошибку или исход неизвестен, не утверждай, что перевод создан, и не повторяй вызов автоматически.
+Preserve the API receipt after every creation and reread balances after a series. On an error or uncertain outcome, do not claim creation and do not retry automatically.
 
-Заверши статусом `готово`, `частично` или `заблокировано`, перечисли созданные и не созданные события человеческими названиями, покажи свежий баланс и минимальный следующий шаг.
+Finish with `готово`, `частично`, or `заблокировано`, list created and not-created events by human name, show the fresh balance, and give the smallest next step.

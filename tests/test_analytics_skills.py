@@ -234,6 +234,32 @@ class AnalyticsArtifactContractTest(unittest.TestCase):
 
         validate_artifact_example(payload)
 
+    def test_audit_example_keeps_chart_local_and_overall_guidance(self):
+        payload = read_json(ARTIFACT_EXAMPLE)
+        blocks = payload['manifest']['blocks']
+        chart_indexes = [
+            index for index, block in enumerate(blocks) if block['type'] == 'chart'
+        ]
+
+        self.assertTrue(chart_indexes)
+        for index in chart_indexes:
+            self.assertEqual(blocks[index + 1]['type'], 'markdown')
+            local_body = blocks[index + 1]['body'].lower()
+            self.assertIn('chart-specific finding', local_body)
+            self.assertIn('chart-specific recommendation', local_body)
+
+        final_bodies = [
+            block['body'].lower()
+            for block in blocks[chart_indexes[-1] + 2 :]
+            if block['type'] == 'markdown'
+        ]
+        self.assertTrue(
+            any('overall audit conclusion' in body for body in final_bodies)
+        )
+        self.assertTrue(
+            any('general recommendations' in body for body in final_bodies)
+        )
+
     def test_manifest_scope_is_rejected_with_the_production_error_path(self):
         payload = read_json(ARTIFACT_EXAMPLE)
         payload = copy.deepcopy(payload)
@@ -420,6 +446,54 @@ class PresentationRoutingContractTest(unittest.TestCase):
 
 
 class ProductionMcpSkillSyncTest(unittest.TestCase):
+    def test_import_dispatcher_and_audit_contract_are_published(self):
+        import_skill = (SKILLS / 'data-import/SKILL.md').read_text(encoding='utf-8')
+        import_rules = (
+            SKILLS / 'shared-resources/data-import-rules.md'
+        ).read_text(encoding='utf-8')
+        index = (SKILLS / '101-index/SKILL.md').read_text(encoding='utf-8')
+        analytics = (SKILLS / 'company-analytics/SKILL.md').read_text(
+            encoding='utf-8'
+        )
+        charts = (
+            SKILLS / 'analytics-visualization/SKILL.md'
+        ).read_text(encoding='utf-8')
+
+        self.assertIn('company owner', import_skill.lower())
+        self.assertIn('`is_owner=true`', import_skill.lower())
+        self.assertIn('separately installed Spreadsheets skill', import_rules)
+        self.assertIn('data-import', index)
+        self.assertIn('offer the technical integrity audit', analytics.lower())
+        self.assertIn('full company financial analysis', analytics.lower())
+        self.assertIn('professional cash flow', analytics.lower())
+        self.assertIn('technical integrity was not checked', analytics.lower())
+        for source in (analytics, charts):
+            self.assertIn('chart-specific finding', source)
+            self.assertIn('chart-specific recommendation', source)
+            self.assertIn('overall audit conclusion', source)
+            self.assertIn('general recommendations', source)
+
+    def test_all_published_skill_markdown_uses_english_prose(self):
+        cyrillic = re.compile(r'[А-Яа-яЁё]')
+        offenders = []
+
+        for path in sorted(SKILLS.rglob('*.md')):
+            for line_number, line in enumerate(
+                path.read_text(encoding='utf-8').splitlines(),
+                start=1,
+            ):
+                without_literals = re.sub(r'`[^`]*`', '', line)
+                if without_literals.strip() in {
+                    '- готово',
+                    '- частично',
+                    '- заблокировано',
+                }:
+                    continue
+                if cyrillic.search(without_literals):
+                    offenders.append(f'{path.relative_to(SKILLS)}:{line_number}')
+
+        self.assertEqual(offenders, [])
+
     def test_financial_audit_active_bodies_and_resources_are_english(self):
         cyrillic = re.compile(r'[А-Яа-яЁё]')
 

@@ -1,7 +1,7 @@
 ---
 name: 101-index
 description: Use when the user asks to read or change data in 101; routes every 101 goal to one available primary workflow while preserving the current chat context.
-version: "1.6.0"
+version: "1.7.0"
 role: index
 invocation: automatic
 intents:
@@ -58,6 +58,8 @@ If the user says only “do an audit,” ask one compact goal question with thes
 
 The word “report” alone does not mean an analytical report. Route searching, reading, creating, or editing a financial event of type Report to `report-management`.
 
+An explicit request to import, migrate, or transfer external source data into the current 101 company routes to `data-import`. It is a one-off owner-only workflow; an attachment or an import offer alone does not authorize a write.
+
 Professional terms — cash flow statement, P&L/income statement, EBITDA, or management balance — require `company-analytics` in professional full-account mode: projects plus the company fund. P&L and income statement mean the same report.
 
 ## Routing
@@ -68,13 +70,15 @@ Professional terms — cash flow statement, P&L/income statement, EBITDA, or man
 4. Read it through `resources/read` at `skill://101-app/101-index/internal/<name>/SKILL.md`.
 5. If the goal is clear, continue without an unnecessary question. Ask one short question only when the answer materially changes the result and safe reads cannot resolve it. A safe read never authorizes a write.
 
-Use `company-analytics` for a general company audit, professional statements, or any analytics that should include visualization. Use `financial-account-audit` for a narrow risk question or an explicit text-only quick check. The technical integrity gate belongs only to a general company audit, never to a narrow request.
+Use `company-analytics` for a general company audit, professional statements, or any analytics that should include visualization. Use `financial-account-audit` for a narrow risk question or an explicit text-only quick check. Offer the optional technical integrity check before any full company financial analysis, including professional statements, never before a narrow request.
 
 Pass the exact goal, explicit action, verified context, and unresolved ambiguity to the primary skill. Do not assemble a write payload on behalf of a domain skill.
 
 Do not preload chart-design instructions. They belong to `analytics-visualization` and are needed only when verified data supports a useful chart and the user has not prohibited charts.
 
 Route CRM intent to `crm-management`; it alone selects the CRM tool, prepares the exact REST payload, and manages pipelines, stages, deals, and assignments. Route tasks to `task-management`; it distinguishes plain text, list, and interactive detail responses and separates conversational MCP actions from app-only widget actions. Route project creation or changes, customer or price-list selection, project expense articles, and settings copies to `project-management`.
+
+When the current user is the company owner and the system has already loaded the complete event list for the active task and found fewer than 50 events, it may make one gentle import offer after the main result. Do not fetch events only to make this offer. Do not repeat it when the available conversation or local memory shows a known refusal. Other roles never receive the offer.
 
 All workflows must obey `safety-and-permissions.md`, including its explicit third-party browser-transfer boundary.
 

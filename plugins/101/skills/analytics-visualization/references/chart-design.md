@@ -116,6 +116,8 @@ In this example, `x=project` and `y=balance`; negative and positive raw values r
 - The canonical partial artifact is `artifact-payload-example.json`.
 - One audit uses one `{surface, manifest, snapshot}` and one `render_artifact`, not independent chart calls.
 - `manifest.blocks` may contain narrative, a `metric-strip`, up to four charts, and tables. Use an adaptive number of charts and include only charts justified by the analytical question and verified data; no fixed count is required.
+- Immediately after each audit chart block, add narrative containing a chart-specific finding and a chart-specific recommendation grounded in the displayed data. Do not use boilerplate or defer all local interpretation to the end.
+- After all chart-local blocks, add a separate overall audit conclusion and separate general recommendations. General recommendations may combine signals and include follow-up checks or deeper-analysis directions. Local and overall blocks are both required and do not replace each other.
 - `snapshot.datasets` contains the same verified aggregates, with at most 500 rows and 40 fields per dataset.
 - `ready|partial|blocked|fixture` are the only statuses. `partial` and `blocked` require `accessIssues[]` with a `lower_snake_case` `id` and an understandable `message`.
 - Call exactly one `validate_artifact`, then pass the unchanged payload to `render_artifact`.

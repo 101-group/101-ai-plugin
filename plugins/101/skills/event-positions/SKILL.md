@@ -30,20 +30,20 @@ completion:
     - заблокировано
 ---
 
-# Подготовка позиций событий
+# Event Position Preparation
 
-Этот helper собирает позиции для `report-management` и `estimate-management`. Он не создаёт событие самостоятельно.
+This helper prepares positions for `report-management` and `estimate-management`. It never creates an event itself.
 
-## Источники
+## Sources
 
-- Для позиции из прайса сначала при необходимости выбери прайс через `list_price_lists`, затем вызови `get_price_list` с `price_list_id` и используй его полные categories/positions; отдельные list/search по категориям и позициям не используй.
-- Для позиции из сметы используй `list_project_estimate_positions` и сохрани её источник в форме API.
-- Для ручной позиции передай явные название, единицу, количество, цену и остальные обязательные поля без выдуманной ссылки на прайс.
+- For a price-list position, select a price list through `list_price_lists` when needed, call `get_price_list` with `price_list_id`, and use its complete categories and positions. Do not invent separate category or position search calls.
+- For an estimate-derived position, use `list_project_estimate_positions` and preserve its API source.
+- For a manual position, pass the explicit name, unit, quantity, price, and all other required fields without an invented price-list reference.
 
-`startDate` и `endDate` бери только из явного запроса или существующей позиции. Если API разрешает `null`, не наследуй даты события, проекта, соседней строки или текущий день.
+Take `startDate` and `endDate` only from the explicit request or an existing position. When the API allows `null`, do not inherit dates from the event, project, neighboring row, or current day.
 
-## Создание и изменение
+## Create and edit
 
-Для нового события собери список в точном формате create-инструмента. Для точечного изменения сначала вызови `get_event`, возьми полный свежий список, измени только явно названные поля целевой позиции и собери полный результирующий список. Остальные позиции, источники и сроки сохрани.
+For a new event, build the list in the exact create-tool format. For a targeted edit, first call `get_event`, take the complete fresh list, change only the explicitly named fields of the target position, and build the complete resulting list. Preserve all other positions, sources, and dates.
 
-Непосредственно перед edit передай результат в `write-preflight`. Если целевая позиция, состав списка или необходимые соседние данные изменились относительно базового снимка, верни конфликт и ничего не записывай. Не выполняй автоматическое слияние и не отправляй одну строку как несуществующий частичный patch.
+Immediately before an edit, pass the result to `write-preflight`. If the target position, list composition, or required neighboring data changed from the baseline snapshot, return a conflict and write nothing. Do not auto-merge or send one row as a nonexistent partial patch.

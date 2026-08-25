@@ -1,8 +1,8 @@
-# Wiki, контент и файлы
+# Wiki Content and Files
 
-- Wiki содержит страницы и упорядоченные Wiki-блоки. Изменение структуры выполняй существующими Wiki-инструментами.
-- Файл сначала загружается через `upload_files`, затем результат действующего API размещается в медиа-блоке страницы.
-- Изображение и обычный файл различаются типом блока и метаданными, которые вернул API; не восстанавливай их из имени файла догадкой.
-- Удаление медиа со страницы означает удаление соответствующего Wiki-блока.
-- Физическое удаление файла из хранилища не входит в сценарий и не имитируется.
-- После изменения перечитай затронутую страницу или блоки и сообщи фактическое состояние.
+- A Wiki contains pages and ordered Wiki blocks. Change structure only through existing Wiki tools.
+- Upload a file through `upload_files`, then place the current API result into the page media block.
+- Images and ordinary files differ by block type and API-returned metadata; never infer either from a filename.
+- Removing media from a page means deleting the corresponding Wiki block.
+- Physical deletion from storage is outside this workflow and must not be simulated.
+- After a mutation, reread the affected page or blocks and report the actual state.
