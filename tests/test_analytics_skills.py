@@ -480,6 +480,16 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
             self.assertIn('overall audit conclusion', source)
             self.assertIn('general recommendations', source)
 
+    def test_technical_integrity_resource_makes_the_full_analysis_gate_automatic(self):
+        resource = (
+            SKILLS / 'shared-resources/technical-integrity-audit.md'
+        ).read_text(encoding='utf-8').lower()
+
+        self.assertIn('run it automatically and unconditionally', resource)
+        self.assertIn('skip it for a narrow request', resource)
+        for obsolete_opt_in in ('offer', 'user agrees', 'user accepted'):
+            self.assertNotIn(obsolete_opt_in, resource)
+
     def test_all_published_skill_files_use_english_prose_except_product_literals(self):
         cyrillic = re.compile(r'[А-Яа-яЁё]')
         allowed_literals = {

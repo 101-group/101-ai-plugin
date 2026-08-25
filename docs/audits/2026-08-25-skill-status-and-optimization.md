@@ -157,13 +157,13 @@ comm -3 \
   <(find plugins/101/skills -type f -name '*.md' | sort)
 ```
 
-Observed output: `14679`, `1632`, `14736`, `1643`, followed by no output from
+Observed output: `14679`, `1632`, `14728`, `1643`, followed by no output from
 `comm -3`. Thus both sides contain 27 Markdown files and the final delta is
-exactly `+57` words and `+11` lines.
+exactly `+49` words and `+11` lines.
 
 | Measurement | Baseline | Final | Delta |
 | --- | ---: | ---: | ---: |
-| Words across all `plugins/101/skills/**/*.md` | 14,679 | 14,736 | +57 |
+| Words across all `plugins/101/skills/**/*.md` | 14,679 | 14,728 | +49 |
 | Lines across all `plugins/101/skills/**/*.md` | 1,632 | 1,643 | +11 |
 
 The small net growth is intentional: central completion wording and queue
@@ -181,9 +181,21 @@ resource test passed in that RED run, establishing that no stale dependency or
 resource edge was hidden by the version failure.
 
 After changing only the public release references in the manifest and README,
-the same focused suite passed. The final full-suite, archive-mirror, and
-whitespace results are recorded in the Task 3 implementer report after the
-archive rebuild.
+the same focused suite passed.
+
+Final whole-branch verification was run directly from the repository root:
+
+```text
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_*.py' -v
+Ran 46 tests in 0.117s
+OK
+```
+
+The final-review regression first failed with the old opt-in resource text,
+then passed after the resource became automatic for full company analysis. It
+requires `run it automatically and unconditionally`, requires the narrow-route
+skip, and rejects `offer`, `user agrees`, and `user accepted` in the technical
+integrity resource.
 
 ## Stdlib parser and public-boundary regression proof
 
@@ -201,8 +213,11 @@ resource. Every completion-bearing skill directly declares that resource with
 separate technical contracts remain exact in analytics and its chart reference:
 `ready|partial|blocked|fixture`.
 
-The canonical skills archive contains 48 regular files. This is a regular-file
-count, not a claim about ZIP directory entries.
+The canonical skills archive was rebuilt from `plugins/101/skills` with
+`zip -q -r -FS -X ../../../downloads/101-skills.zip .`. It contains 48 regular
+files, byte-for-byte mirrors the skill tree, and has SHA-256
+`fa819eee62bae2ed041da75b7a8a03cca254c6e4055f65309e7734798e395696`.
+This is a regular-file count, not a claim about ZIP directory entries.
 
 ## Independent behavioral boundary review
 

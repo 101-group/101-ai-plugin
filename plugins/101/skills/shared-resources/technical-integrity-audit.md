@@ -1,6 +1,6 @@
 # Technical Integrity Audit
 
-This audit checks only structural and arithmetic integrity. Offer it briefly before a full company financial analysis, including professional cash flow, P&L/income statement, EBITDA, or management balance work, and run it only after the user agrees. Do not offer or run it automatically before a narrow request.
+This audit checks only structural and arithmetic integrity. Immediately before a full company financial analysis, including professional cash flow, P&L/income statement, EBITDA, or management balance work, run it automatically and unconditionally. Skip it for a narrow request about one project, counterparty, expense class, or metric.
 
 ## Complete reads
 
@@ -32,7 +32,7 @@ A missing project on a fund-only event is not an error. An identifier without a 
 
 ## Check result
 
-When the user accepted this check, any structural or arithmetic error stops the following full financial analysis until it is corrected. Return a list containing the affected event or entity, the broken rule, and a correction recommendation. Change nothing automatically.
+Any structural or arithmetic error blocks the following full financial analysis until it is corrected. Return a list containing the affected event or entity, the broken rule, and a correction recommendation. Change nothing automatically.
 
 Unconfirmed operations, probable duplicates, and semantically generic counterparty names are not technical-audit failures. Evaluate them later as financial warnings.
 
