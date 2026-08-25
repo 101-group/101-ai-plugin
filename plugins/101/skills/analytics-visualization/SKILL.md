@@ -13,6 +13,9 @@ required_tools:
   - render_artifact
 optional_tools: []
 resources:
+  - path: ../shared-resources/safety-and-permissions.md
+    kind: semantic-guide
+    required: true
   - path: references/chart-design.md
     kind: semantic-guide
     required: true

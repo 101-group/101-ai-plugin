@@ -397,6 +397,28 @@ def resource_contract_errors() -> list[str]:
     return errors
 
 
+def completion_safety_resource_errors() -> list[str]:
+    errors = []
+    for skill_path in skill_paths():
+        data = frontmatter_data(skill_path)
+        completion = data.get('completion')
+        if not isinstance(completion, dict) or 'statuses' not in completion:
+            continue
+        resources = data.get('resources')
+        has_safety_policy = isinstance(resources, list) and any(
+            resource.get('path') == '../shared-resources/safety-and-permissions.md'
+            and resource.get('required') is True
+            for resource in resources
+            if isinstance(resource, dict)
+        )
+        if not has_safety_policy:
+            errors.append(
+                f'{skill_path.parent.name}: missing required safety-and-permissions '
+                'resource'
+            )
+    return errors
+
+
 def public_completion_contract_errors() -> list[str]:
     errors = []
     policy = read_skill_resource('shared-resources/safety-and-permissions.md')
@@ -413,17 +435,7 @@ def public_completion_contract_errors() -> list[str]:
     ):
         errors.append('canonical unfinished completion template is missing')
 
-    index_data = frontmatter_data(SKILLS / '101-index/SKILL.md')
-    if not any(
-        resource.get('path') == '../shared-resources/safety-and-permissions.md'
-        for resource in index_data.get('resources', [])
-        if isinstance(resource, dict)
-    ):
-        errors.append('dispatcher cannot reach the central completion policy')
-    if 'All workflows must obey `safety-and-permissions.md`' not in skill_body(
-        SKILLS / '101-index/SKILL.md'
-    ):
-        errors.append('dispatcher does not assign central completion policy')
+    errors.extend(completion_safety_resource_errors())
 
     for skill_path in skill_paths():
         if completion_statuses(skill_path) != USER_COMPLETION_STATUSES:
@@ -449,6 +461,9 @@ class SkillBehaviorContractTest(unittest.TestCase):
 
     def test_resource_declarations_are_required_and_use_allowed_kinds(self):
         self.assertEqual(resource_contract_errors(), [])
+
+    def test_every_completion_bearing_skill_directly_declares_safety_policy(self):
+        self.assertEqual(completion_safety_resource_errors(), [])
 
     def test_all_public_skill_bodies_keep_the_completion_boundary(self):
         self.assertEqual(public_completion_contract_errors(), [])

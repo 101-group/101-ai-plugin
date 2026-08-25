@@ -37,7 +37,7 @@ user-facing completion status.
 
 The parsed graph contains 16 named nodes and 25 dependency edges. Every edge
 resolves to one of those nodes, no skill depends on itself, and depth-first
-cycle detection found no cycle. The resource audit found 49 declared resource
+cycle detection found no cycle. The resource audit found 51 declared resource
 links; every one declares `required: true`, uses an allowed resource kind,
 resolves to a file, and remains within `plugins/101/skills/`.
 
@@ -157,14 +157,14 @@ comm -3 \
   <(find plugins/101/skills -type f -name '*.md' | sort)
 ```
 
-Observed output: `14679`, `1632`, `14722`, `1637`, followed by no output from
+Observed output: `14679`, `1632`, `14736`, `1643`, followed by no output from
 `comm -3`. Thus both sides contain 27 Markdown files and the final delta is
-exactly `+43` words and `+5` lines.
+exactly `+57` words and `+11` lines.
 
 | Measurement | Baseline | Final | Delta |
 | --- | ---: | ---: | ---: |
-| Words across all `plugins/101/skills/**/*.md` | 14,679 | 14,722 | +43 |
-| Lines across all `plugins/101/skills/**/*.md` | 1,632 | 1,637 | +5 |
+| Words across all `plugins/101/skills/**/*.md` | 14,679 | 14,736 | +57 |
+| Lines across all `plugins/101/skills/**/*.md` | 1,632 | 1,643 | +11 |
 
 The small net growth is intentional: central completion wording and queue
 ownership replace larger repeated sections while preserving the explicit
@@ -196,9 +196,10 @@ checks the allowed kind set: `semantic-guide`, `routing-contract`,
 The public completion test examines all 16 skill bodies, rejects the Russian
 user-facing `заблокировано`, requires the exact frontmatter triplet, and
 physically checks the two-line unfinished result template in the central safety
-resource. The dispatcher declares that resource and assigns it to all
-workflows. The separate technical contracts remain exact in analytics and its
-chart reference: `ready|partial|blocked|fixture`.
+resource. Every completion-bearing skill directly declares that resource with
+`required: true`; the dispatcher is not used as a proxy for this ownership. The
+separate technical contracts remain exact in analytics and its chart reference:
+`ready|partial|blocked|fixture`.
 
 The canonical skills archive contains 48 regular files. This is a regular-file
 count, not a claim about ZIP directory entries.

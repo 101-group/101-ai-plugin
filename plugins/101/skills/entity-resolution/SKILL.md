@@ -22,6 +22,9 @@ resources:
   - path: ../shared-resources/context-and-identity.md
     kind: semantic-guide
     required: true
+  - path: ../shared-resources/safety-and-permissions.md
+    kind: semantic-guide
+    required: true
 completion:
   statuses:
     - готово
