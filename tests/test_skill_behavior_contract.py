@@ -2,6 +2,8 @@ import re
 import unittest
 from pathlib import Path
 
+import yaml
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = ROOT / 'plugins/101/skills'
@@ -12,39 +14,78 @@ USER_COMPLETION_STATUSES = (
     'не завершено',
 )
 
+EXPECTED_SKILL_NAMES = {
+    '101-index',
+    'analytics-visualization',
+    'company-analytics',
+    'crm-management',
+    'data-import',
+    'entity-resolution',
+    'estimate-management',
+    'event-positions',
+    'file-handling',
+    'financial-account-audit',
+    'project-management',
+    'report-management',
+    'settlements-and-transfers',
+    'task-management',
+    'wiki-management',
+    'write-preflight',
+}
+
+EXPECTED_SHARED_RESOURCES = {
+    'shared-resources/context-and-identity.md',
+    'shared-resources/data-import-rules.md',
+    'shared-resources/events-and-positions.md',
+    'shared-resources/finance-and-balances.md',
+    'shared-resources/financial-risks-and-project-controls.md',
+    'shared-resources/management-reporting-and-balances.md',
+    'shared-resources/safety-and-permissions.md',
+    'shared-resources/technical-integrity-audit.md',
+    'shared-resources/wiki-content-and-files.md',
+}
+
+
+def skill_paths() -> list[Path]:
+    return sorted(SKILLS.glob('*/SKILL.md'))
+
+
+def shared_resource_paths() -> list[Path]:
+    return sorted((SKILLS / 'shared-resources').glob('*.md'))
+
+
+def frontmatter_data(skill_path: Path) -> dict:
+    parts = skill_path.read_text(encoding='utf-8').split('---', 2)
+    if len(parts) != 3 or parts[0].strip():
+        raise AssertionError(f'valid frontmatter missing in {skill_path}')
+
+    data = yaml.safe_load(parts[1])
+    if not isinstance(data, dict):
+        raise AssertionError(f'frontmatter is not a mapping in {skill_path}')
+    return data
+
 
 def read_frontmatter(skill_path: Path) -> str:
     return skill_path.read_text(encoding='utf-8').split('---', 2)[1]
 
 
 def frontmatter_list(skill_path: Path, key: str) -> tuple[str, ...]:
-    frontmatter = read_frontmatter(skill_path)
-    match = re.search(
-        rf'{re.escape(key)}:\n((?:  - .+\n)+)',
-        frontmatter,
-    )
-    if match is None:
+    value = frontmatter_data(skill_path).get(key)
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
         raise AssertionError(f'{key} missing in {skill_path}')
-
-    return tuple(
-        line.removeprefix('  - ').strip()
-        for line in match.group(1).splitlines()
-    )
+    return tuple(value)
 
 
 def completion_statuses(skill_path: Path) -> tuple[str, ...]:
-    frontmatter = read_frontmatter(skill_path)
-    match = re.search(
-        r'completion:\n  statuses:\n((?:    - .+\n)+)',
-        frontmatter,
-    )
-    if match is None:
+    completion = frontmatter_data(skill_path).get('completion')
+    if not isinstance(completion, dict):
         raise AssertionError(f'completion.statuses missing in {skill_path}')
-
-    return tuple(
-        line.removeprefix('    - ').strip()
-        for line in match.group(1).splitlines()
-    )
+    statuses = completion.get('statuses')
+    if not isinstance(statuses, list) or not all(
+        isinstance(status, str) for status in statuses
+    ):
+        raise AssertionError(f'completion.statuses missing in {skill_path}')
+    return tuple(statuses)
 
 
 def read_skill_resource(relative_path: str) -> str:
@@ -99,16 +140,138 @@ def optional_tools(skill_path: Path) -> tuple[str, ...]:
     return frontmatter_list(skill_path, 'optional_tools')
 
 
-class SkillBehaviorContractTest(unittest.TestCase):
-    def test_every_skill_uses_the_user_completion_contract(self):
-        skill_paths = sorted(
-            path
-            for path in SKILLS.glob('*/SKILL.md')
-            if path.parent.name != 'shared-resources'
+def relative_to_skills(path: Path) -> str | None:
+    try:
+        return path.resolve().relative_to(SKILLS.resolve()).as_posix()
+    except ValueError:
+        return None
+
+
+def dependency_graph_errors() -> list[str]:
+    errors = []
+    paths = skill_paths()
+    actual_names = {path.parent.name for path in paths}
+    if actual_names != EXPECTED_SKILL_NAMES:
+        errors.append(
+            f'skill inventory mismatch: expected {sorted(EXPECTED_SKILL_NAMES)}, '
+            f'got {sorted(actual_names)}'
         )
 
-        self.assertEqual(len(skill_paths), 16)
-        for skill_path in skill_paths:
+    frontmatters = {}
+    names = {}
+    for path in paths:
+        try:
+            data = frontmatter_data(path)
+        except (AssertionError, yaml.YAMLError) as error:
+            errors.append(str(error))
+            continue
+        frontmatters[path.parent.name] = data
+        name = data.get('name')
+        if not isinstance(name, str):
+            errors.append(f'{path}: name is missing')
+        elif name in names:
+            errors.append(f'duplicate skill name {name}: {names[name]} and {path}')
+        else:
+            names[name] = path
+
+    graph = {}
+    for directory_name, data in frontmatters.items():
+        declared_name = data.get('name')
+        dependencies = data.get('depends_on')
+        if not isinstance(dependencies, list) or not all(
+            isinstance(dependency, str) for dependency in dependencies
+        ):
+            errors.append(f'{directory_name}: depends_on must be a YAML list')
+            continue
+        graph[declared_name] = dependencies
+        for dependency in dependencies:
+            if dependency not in names:
+                errors.append(f'{declared_name}: unresolved dependency {dependency}')
+            if dependency == declared_name:
+                errors.append(f'{declared_name}: self dependency')
+
+    visited = set()
+    visiting = set()
+
+    def visit(name: str, trail: tuple[str, ...]) -> None:
+        if name in visiting:
+            errors.append(f'dependency cycle: {" -> ".join((*trail, name))}')
+            return
+        if name in visited or name not in graph:
+            return
+        visiting.add(name)
+        for dependency in graph[name]:
+            visit(dependency, (*trail, name))
+        visiting.remove(name)
+        visited.add(name)
+
+    for name in graph:
+        visit(name, ())
+    return errors
+
+
+def resource_link_errors() -> list[str]:
+    errors = []
+    actual_resources = {
+        path.relative_to(SKILLS).as_posix()
+        for path in shared_resource_paths()
+    }
+    if actual_resources != EXPECTED_SHARED_RESOURCES:
+        errors.append(
+            f'shared resource inventory mismatch: '
+            f'expected {sorted(EXPECTED_SHARED_RESOURCES)}, '
+            f'got {sorted(actual_resources)}'
+        )
+
+    for skill_path in skill_paths():
+        try:
+            resources = frontmatter_data(skill_path).get('resources')
+        except (AssertionError, yaml.YAMLError) as error:
+            errors.append(str(error))
+            continue
+        if not isinstance(resources, list):
+            errors.append(f'{skill_path.parent.name}: resources must be a YAML list')
+            continue
+        for resource in resources:
+            if not isinstance(resource, dict):
+                errors.append(f'{skill_path.parent.name}: invalid resource declaration')
+                continue
+            relative_path = resource.get('path')
+            if not isinstance(relative_path, str):
+                errors.append(f'{skill_path.parent.name}: resource path is missing')
+                continue
+            resolved = skill_path.parent / relative_path
+            normalized = relative_to_skills(resolved)
+            if normalized is None:
+                errors.append(
+                    f'{skill_path.parent.name}: resource escapes skills root: '
+                    f'{relative_path}'
+                )
+            elif not resolved.is_file():
+                errors.append(
+                    f'{skill_path.parent.name}: unresolved resource {relative_path}'
+                )
+    return errors
+
+
+class SkillBehaviorContractTest(unittest.TestCase):
+    def test_all_dependencies_and_resources_resolve(self):
+        self.assertEqual(dependency_graph_errors(), [])
+        self.assertEqual(resource_link_errors(), [])
+
+    def test_yaml_frontmatter_preserves_inline_empty_lists(self):
+        analytics_path = SKILLS / 'analytics-visualization/SKILL.md'
+        self.assertEqual(depends_on(analytics_path), ())
+        self.assertEqual(optional_tools(analytics_path), ())
+
+    def test_every_skill_uses_the_user_completion_contract(self):
+        paths = skill_paths()
+
+        self.assertEqual(
+            {path.parent.name for path in paths},
+            EXPECTED_SKILL_NAMES,
+        )
+        for skill_path in paths:
             self.assertEqual(
                 completion_statuses(skill_path),
                 USER_COMPLETION_STATUSES,
