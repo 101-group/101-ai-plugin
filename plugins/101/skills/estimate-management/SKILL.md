@@ -53,19 +53,12 @@ Resolve the company, project, and other named entities through `entity-resolutio
 
 For creation, prepare positions through `event-positions`, preserve their sources, `startDate`, and `endDate`, pass the exact create payload to `write-preflight`, and call `create_estimate`.
 
+When the user explicitly requests a complete estimate and every required field is known, proceed after fresh `write-preflight` under the central MCP policy without a second chat confirmation.
+
 For an edit, first call `get_event`. Convert a targeted position change through `event-positions` into the complete resulting list while preserving neighboring rows and dates. After a fresh `write-preflight`, call `edit_estimate`. Stop and show a conflict on a concurrent change.
 
 ## Estimate series
 
-A bulk request is a sequence of individual `create_estimate` calls, not a new batch payload.
-
-1. Build the full queue and run a common preflight covering required fields, entities, machine schema, positions, and the ability to build every exact payload.
-2. If any error is known in advance, create nothing; request all corrections in one message, then recheck the entire queue.
-3. After the common check succeeds, briefly state the queue and start without another confirmation unless central policy requires one.
-4. Repeat a fresh `write-preflight` before each item and make one API call.
-5. A local data error marks that item not created but does not block later independent items.
-6. A system error, lost permission, contract change, or uncertain write outcome stops the unprocessed tail.
-
-Preserve an API receipt for every successful call. On continuation, skip proven created items, recheck proven not-started items, and first compare server state for an unknown outcome. Never retry an unknown write automatically.
+A bulk request still uses one `create_estimate` call per item, never a new batch payload. Follow the shared sequential queue contract in `events-and-positions.md`.
 
 Use the canonical completion contract from `safety-and-permissions.md`; list created, not created, and not started estimates by human name, show fresh data, and give the smallest next step.

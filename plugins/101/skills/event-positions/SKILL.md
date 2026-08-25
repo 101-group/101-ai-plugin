@@ -1,6 +1,6 @@
 ---
 name: event-positions
-description: Use when an internal report or estimate workflow must resolve price-list, estimate-derived, or manual positions and preserve their startDate and endDate through the existing event API.
+description: Use when an internal report or estimate workflow must resolve price-list, estimate-derived, or manual positions through the existing event API.
 version: "1.0.0"
 role: helper
 invocation: internal
@@ -9,7 +9,6 @@ intents:
   - events.positions.edit
 depends_on:
   - entity-resolution
-  - write-preflight
 required_tools:
   - get_event
   - list_project_estimate_positions
@@ -32,7 +31,7 @@ completion:
 
 # Event Position Preparation
 
-This helper prepares positions for `report-management` and `estimate-management`. It never creates an event itself.
+This helper prepares positions for `report-management` and `estimate-management`. It never creates an event itself, and it does not own preflight, shared queue execution, or confirmation policy.
 
 ## Sources
 
@@ -40,10 +39,8 @@ This helper prepares positions for `report-management` and `estimate-management`
 - For an estimate-derived position, use `list_project_estimate_positions` and preserve its API source.
 - For a manual position, pass the explicit name, unit, quantity, price, and all other required fields without an invented price-list reference.
 
-Take `startDate` and `endDate` only from the explicit request or an existing position. When the API allows `null`, do not inherit dates from the event, project, neighboring row, or current day.
+Shared rules for source preservation, `startDate`, `endDate`, full-list edits, conflict handling, and sequential queue execution live in `events-and-positions.md`.
 
 ## Create and edit
 
-For a new event, build the list in the exact create-tool format. For a targeted edit, first call `get_event`, take the complete fresh list, change only the explicitly named fields of the target position, and build the complete resulting list. Preserve all other positions, sources, and dates.
-
-Immediately before an edit, pass the result to `write-preflight`. If the target position, list composition, or required neighboring data changed from the baseline snapshot, return a conflict and write nothing. Do not auto-merge or send one row as a nonexistent partial patch.
+For a new event, build positions in the exact create-tool format expected by the primary skill. For a targeted edit, first call `get_event`, resolve the requested position changes, and return the exact resulting position data the primary skill must place into the full payload.

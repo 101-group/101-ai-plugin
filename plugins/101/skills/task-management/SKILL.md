@@ -13,6 +13,7 @@ intents:
 depends_on:
   - entity-resolution
   - write-preflight
+  - file-handling
 required_tools:
   - whoami
   - list_tasks
@@ -23,7 +24,6 @@ optional_tools:
   - list_task_comments
   - add_task_comment
   - list_contractors
-  - upload_files
 resources:
   - path: ../shared-resources/context-and-identity.md
     kind: semantic-guide
@@ -63,6 +63,6 @@ Inside the widget, the user may:
 
 Handle an explicit conversational request to change status or another field through `update_task` after a fresh read and `write-preflight`. Handle an explicit request to submit a comment without opening the widget through `add_task_comment`. Never turn a read or recommendation into a write.
 
-When the user attaches files outside the widget, call `upload_files` first, then pass server identifiers only to a tool that supports attachments. Never substitute local paths, temporary URLs, or file contents for a server identifier.
+When the user attaches files outside the widget, route them through `file-handling` and pass only server identifiers to a tool that supports attachments. Never substitute local paths, temporary URLs, or file contents for a server identifier.
 
 After a write, report the server-confirmed status, assignee, or comment using human-readable names. Do not expose GUIDs without an explicit request.
