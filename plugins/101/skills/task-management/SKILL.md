@@ -38,31 +38,31 @@ completion:
     - заблокировано
 ---
 
-# Управление задачами
+# Task Management
 
-Работай только как главный скилл, назначенный `101-index`. Сохраняй явное намерение пользователя: текстовый ответ, список, открытие интерактивной деталки или запись — разные маршруты.
+Run only as the primary skill selected by `101-index`. Preserve the user's explicit intent: plain text, a list, opening interactive details, and a mutation are different routes.
 
-## Список и чтение
+## Lists and reads
 
-Для списка вызови `list_tasks` с серверными фильтрами. Если пользователь просит показать список, используй presentation token (токен показа) и ровно один `show_result`; не собирай отдельную таблицу или новый UI.
+For a list, call `list_tasks` with server-side filters. When the user asks to show the list, use the presentation token and exactly one `show_result` call; do not build a separate table or new UI.
 
-Для одной задачи сначала разреши её через `entity-resolution`, затем вызови `get_task`. При просьбе «открой», «покажи детали» или явном желании работать с задачей возьми `structuredContent.presentation.token` и вызови ровно один `show_result({token})`. Должен открыться `task_detail` в `ui://101/widget/app-2.0.7.html` с теми же секциями, размерами и отступами, что в приложении 101.
+For one task, first resolve it through `entity-resolution`, then call `get_task`. When the user asks to open or show details, or clearly wants to work with the task, take `structuredContent.presentation.token` and call `show_result({token})` exactly once. This must open `task_detail` in `ui://101/widget/app-2.0.7.html` with the same sections, dimensions, and spacing as the 101 application.
 
-## Интерактивная деталка
+## Interactive detail
 
-Внутри виджета пользователь может:
+Inside the widget, the user may:
 
-- сменить статус;
-- выбрать или снять исполнителя;
-- отправить комментарий;
-- приложить файлы к комментарию.
+- change status;
+- assign or remove an assignee;
+- submit a comment;
+- attach files to a comment.
 
-`set_task_assignee` и `submit_task_comment` — app-only действия (доступны только виджету). Не вызывай их из обычного разговора и не проси модель подменять клики пользователя. Виджет сам использует их через Apps bridge (мост приложения), сохраняет черновик и после записи перечитывает авторитетные данные.
+`set_task_assignee` and `submit_task_comment` are app-only actions available only to the widget. Do not call them from ordinary conversation or have the model imitate user clicks. The widget invokes them through the Apps bridge, preserves its draft, and rereads authoritative data after the write.
 
-## Запись из разговора
+## Conversational writes
 
-Явную текстовую просьбу изменить статус или другое поле выполняй через `update_task` после свежего чтения и `write-preflight`. Явную просьбу отправить комментарий без открытия виджета выполняй через `add_task_comment`. Не превращай чтение или рекомендацию в запись.
+Handle an explicit conversational request to change status or another field through `update_task` after a fresh read and `write-preflight`. Handle an explicit request to submit a comment without opening the widget through `add_task_comment`. Never turn a read or recommendation into a write.
 
-Если пользователь прикладывает файлы вне виджета, сначала используй `upload_files`, затем передай серверные идентификаторы только в инструмент, который поддерживает вложения. Не вставляй локальные пути, временные URL или содержимое файла вместо серверного идентификатора.
+When the user attaches files outside the widget, call `upload_files` first, then pass server identifiers only to a tool that supports attachments. Never substitute local paths, temporary URLs, or file contents for a server identifier.
 
-После записи покажи подтверждённый сервером статус, исполнителя или комментарий человеческими названиями. Не показывай GUID без прямого запроса.
+After a write, report the server-confirmed status, assignee, or comment using human-readable names. Do not expose GUIDs without an explicit request.

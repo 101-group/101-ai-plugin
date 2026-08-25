@@ -4,8 +4,8 @@
     {
       "id": "bounded_comparison_or_trend",
       "examples": [
-        "сравни проекты по балансу",
-        "покажи динамику расходов"
+        "compare projects by balance",
+        "show the expense trend"
       ],
       "tools": [
         "render_chart"
@@ -18,9 +18,9 @@
     {
       "id": "audit_or_multicomponent_analysis",
       "examples": [
-        "сделай финансовый аудит",
-        "проанализируй финансовое состояние",
-        "оцени риски компании"
+        "run a financial audit",
+        "analyze financial health",
+        "assess company risks"
       ],
       "tools": [
         "validate_artifact",
@@ -40,8 +40,8 @@
     {
       "id": "project_list",
       "examples": [
-        "выведи список проектов",
-        "покажи проекты"
+        "show the project list",
+        "show projects"
       ],
       "tools": [
         "list_projects",
@@ -55,8 +55,8 @@
     {
       "id": "event_list",
       "examples": [
-        "выведи список событий",
-        "покажи последние события"
+        "show the event list",
+        "show recent events"
       ],
       "tools": [
         "list_events",
@@ -70,8 +70,8 @@
     {
       "id": "task_detail",
       "examples": [
-        "открой задачу",
-        "покажи детали задачи"
+        "open the task",
+        "show task details"
       ],
       "tools": [
         "get_task",
@@ -85,8 +85,8 @@
     {
       "id": "scalar_read",
       "examples": [
-        "сколько денег",
-        "найди проект Север"
+        "how much money",
+        "find the North project"
       ],
       "tools": [],
       "presentation": false

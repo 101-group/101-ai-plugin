@@ -49,29 +49,29 @@ completion:
     - заблокировано
 ---
 
-# Управление Wiki и файлами
+# Wiki and File Management
 
-Работай только как главный скилл, назначенный `101-index`. Ты владеешь пользовательской целью управления Wiki, страницами, блоками, публикацией, правами и размещёнными медиа. Не создавай параллельный Wiki-контракт.
+Run only as the primary skill selected by `101-index`. Own the user's goal for Wiki spaces, pages, blocks, publication, permissions, and placed media. Never create a parallel Wiki contract.
 
-## Чтение и разрешение
+## Reads and resolution
 
-Через `entity-resolution` найди Wiki и страницу по человеческому названию. Используй `list_wikis`, `get_wiki_page`, `list_wiki_blocks`, permission и publication read-инструменты. При нескольких совпадениях попроси выбрать; не показывай GUID.
+Use `entity-resolution` to find a Wiki and page by human name. Use `list_wikis`, `get_wiki_page`, `list_wiki_blocks`, and the permission and publication read tools. When several matches exist, ask the user to choose and do not expose GUIDs.
 
-## Изменения
+## Mutations
 
-Перед `create_wiki`, `update_wiki`, `create_wiki_page`, `update_wiki_page`, `mutate_wiki_blocks`, изменением прав или публикации применяй `write-preflight` и точный текущий payload соответствующего инструмента. После записи перечитай затронутую сущность.
+Before `create_wiki`, `update_wiki`, `create_wiki_page`, `update_wiki_page`, `mutate_wiki_blocks`, or a permission/publication change, apply `write-preflight` and the exact current payload of that tool. Reread the affected entity after the write.
 
-При редактировании блоков сохраняй порядок и незатронутые блоки. Не заменяй содержимое всей страницы, если пользователь просил изменить один блок.
+When editing blocks, preserve order and untouched blocks. Do not replace an entire page when the user asked to change one block.
 
-## Изображения и файлы
+## Images and files
 
-1. Передай пользовательские файлы в `file-handling`.
-2. Используй только подтверждённый результат upload API: URL, тип, размер и идентификатор не восстанавливай из имени.
-3. Создай или обнови соответствующий медиа-блок через существующий блоковый API.
-4. Если пользователь удаляет медиа со страницы, удали только Wiki-блок через `delete_wiki_media_block`.
+1. Pass user-provided files to `file-handling`.
+2. Use only a proven upload API result; never derive URL, type, size, or identifier from the filename.
+3. Create or update the relevant media block through the existing block API.
+4. When the user removes media from a page, delete only the Wiki block through `delete_wiki_media_block`.
 
-Физическое удаление файла из хранилища не поддерживается и не имитируется. Успешная загрузка при неуспешном размещении даёт статус `частично` с точным описанием загруженного файла и незавершённого блока.
+Physical deletion from storage is unsupported and must not be simulated. A successful upload followed by failed placement returns `частично` with the exact uploaded file and unfinished block.
 
-## Завершение
+## Completion
 
-Верни `готово`, `частично` или `заблокировано`; назови Wiki и страницу человеческими именами, перечисли проверенные или изменённые блоки, права, публикацию и медиа, покажи свежий результат и минимальный следующий шаг.
+Return `готово`, `частично`, or `заблокировано`; name the Wiki and page in human terms, list verified or changed blocks, permissions, publication, and media, show the fresh result, and provide the smallest next step.

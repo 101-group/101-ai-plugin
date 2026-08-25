@@ -55,34 +55,34 @@ completion:
     - заблокировано
 ---
 
-# Управление CRM
+# CRM Management
 
-Работай только как главный внутренний скилл, назначенный `101-index`. Веди сценарии воронок, этапов, сделок и правил распределения через 21 канонический MCP-инструмент. Не создавай второй диспетчер, CRM-виджет или параллельный CRM-контракт.
+Run only as the primary internal skill selected by `101-index`. Handle pipelines, stages, deals, and distribution rules through the 21 canonical MCP tools. Never create a second dispatcher, CRM widget, or parallel CRM contract.
 
-До выбора конкретного инструмента прочитай обязательный CRM-контракт оркестрации `references/crm-orchestration.md`. Он определяет безопасные чтения, смысловые развилки, минимальные вопросы и квитанцию для каждой из 21 операции. Схему аргументов всегда бери из текущей machine schema инструмента, а не из примеров ресурса.
+Before selecting a tool, read the required orchestration contract in `references/crm-orchestration.md`. It defines safe reads, semantic branches, minimal questions, and receipts for all 21 operations. Always take the argument schema from the current tool machine schema rather than examples in the resource.
 
-## Чтение и разрешение сущностей
+## Reads and entity resolution
 
-1. Закрепи пользователя и компанию через `whoami` и общий контекст.
-2. Найди воронку через `list_crm_pipelines`; при нескольких совпадениях попроси выбрать по человеческому названию.
-3. Читай `get_crm_pipeline` как каноническую деталку: из неё бери этапы, сделки, источники и пользовательские поля. Не создавай отдельные lookup-вызовы для этих сущностей.
-4. Для контакта сделки переиспользуй `list_contractors` или `search_users`. Не угадывай `contractorGuid` и не показывай GUID без прямого запроса.
-5. Перед настройкой распределения вызови `get_crm_distribution_rule_schema`; кандидатов, условия и стратегии бери только из этого ответа.
+1. Fix the user and company through `whoami` and shared context.
+2. Find the pipeline through `list_crm_pipelines`; when several match, ask the user to choose by human name.
+3. Treat `get_crm_pipeline` as the canonical detail response for stages, deals, sources, and custom fields. Do not create separate lookup calls for those entities.
+4. Reuse `list_contractors` or `search_users` for a deal contact. Never guess `contractorGuid` or expose a GUID without an explicit request.
+5. Call `get_crm_distribution_rule_schema` before configuring distribution; take candidates, conditions, and strategies only from this result.
 
-Сначала получай всё, что можно однозначно доказать безопасным чтением. Если для выбранного действия недостаёт обязательного пользовательского смысла или найдено несколько сущностей, задай один минимальный вопрос с человеческими вариантами. Объединяй тесно связанные недостающие параметры в один компактный блок, когда по отдельности ответ не позволяет выполнить действие. До ответа не вызывай write-инструмент и не подставляй API default, если он заметно меняет пользовательский результат.
+First gather everything that safe reads can prove uniquely. If a required user decision is missing or several entities match, ask one minimal question with understandable choices. Combine tightly related missing parameters into one compact block when separate answers would not enable the action. Before the answer, do not call a write tool or apply an API default that materially changes the result.
 
-## Контракт записи
+## Write contract
 
-Перед записью применяй `entity-resolution` и `write-preflight`. Передавай аргумент `payload` один в один с body текущего CRM REST API: не переименовывай поля, не вычисляй права и не исправляй payload вместо API. Path-параметры идентифицируют существующую сущность, а `payload` содержит только тело соответствующего REST-запроса.
+Apply `entity-resolution` and `write-preflight`. Pass `payload` one-to-one with the current CRM REST body: do not rename fields, compute permissions, or correct the payload on behalf of the API. Path parameters identify an existing entity; `payload` contains only the corresponding request body.
 
-Обычные create, edit, move и reorder выполняются одним вызовом после полного preflight без дополнительного подтверждения. Узкое исключение — AI-generated правила распределения: перед create, edit или reorder покажи краткую человеческую интерпретацию итоговой логики и проверок и получи явное подтверждение пользователя. Это разговорный гейт, а не `_confirmation_token`. Только delete использует центральное двухшаговое подтверждение MCP с `_confirmation_token`; не подменяй разговорным согласием второй delete-вызов и не добавляй токен к другим операциям.
+Ordinary create, edit, move, and reorder operations use one call after complete preflight with no extra confirmation. The narrow exception is AI-generated distribution rules: before create, edit, or reorder, show a short human interpretation of the final logic and checks and obtain explicit user confirmation. This is a conversational gate, not `_confirmation_token`. Only delete uses central two-step MCP confirmation with `_confirmation_token`; conversational consent never replaces the second delete call, and other operations never receive the token.
 
-Ответ, ошибки, бизнес-валидацию и доменные права считай результатом CRM API. После записи назови изменённую сущность человеческим именем и используй свежий payload ответа как квитанцию; если он не содержит нужной деталки, перечитай сущность каноническим read-инструментом.
+Treat the CRM API response, errors, business validation, and domain permissions as authoritative. After a write, name the changed entity in human terms and use the fresh response payload as the receipt; reread with the canonical read tool when details are missing.
 
-## Границы пакета
+## Package boundaries
 
-Не создавай инструменты участников воронки, конструктора и удаления значений полей, CRM-страниц и блоков или CRUD источников: они не входят в текущий пакет. Не подменяй их составными действиями через другие API. Текущий пакет работает без виджета и без feature flags.
+Do not create tools for pipeline members, field value builders/deletion, CRM pages/blocks, or source CRUD; they are outside this package. Do not emulate them with composite actions through other APIs. The package uses no widget and no feature flags.
 
-## Завершение
+## Completion
 
-Верни `готово`, `частично` или `заблокировано`; назови воронку, этап, сделку или правило человеческим именем, перечисли проверенные или изменённые данные, результат API и минимальный следующий шаг.
+Return `готово`, `частично`, or `заблокировано`; name the pipeline, stage, deal, or rule in human terms, list verified or changed data, include the API result, and provide the smallest next step.

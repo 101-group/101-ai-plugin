@@ -40,22 +40,22 @@ completion:
     - заблокировано
 ---
 
-# Управление проектами
+# Project Management
 
-Работай как главный внутренний скилл `101-index`. Создавай и изменяй проекты и их статьи один в один с текущими REST-контрактами; имена, типы и обязательность полей всегда бери из machine schema (машинной схемы) инструмента.
+Run as the primary internal skill selected by `101-index`. Create and edit projects and their expense articles one-to-one with current REST contracts; always take field names, types, and requirements from the tool's machine schema.
 
-## Проект
+## Project
 
-1. Закрепи компанию через `whoami`. Заказчика разрешай через `search_users`, существующий проект — через `list_projects`, не угадывай GUID.
-2. Прайс-лист выбирай через `list_price_lists` и при необходимости `get_price_list`; передавай его как `priceListId` в `create_project` или `edit_project`.
-3. Перед записью примени `entity-resolution` и `write-preflight`. Для создания вызови `create_project`; для частичного изменения — только `edit_project`. GET-форму редактирования не имитируй.
+1. Fix the company through `whoami`. Resolve the customer through `search_users` and an existing project through `list_projects`; never guess a GUID.
+2. Select a price list through `list_price_lists` and, when needed, `get_price_list`; pass it as `priceListId` to `create_project` or `edit_project`.
+3. Before writing, apply `entity-resolution` and `write-preflight`. Use `create_project` for creation and only `edit_project` for partial changes. Do not simulate the edit GET form.
 
-## Статьи расходов
+## Expense articles
 
-- Текущие статьи читай через `list_bills`. Создавай проектную статью через `create_bill`, меняй через `edit_bill`; статьи фонда компании и удаление не входят в этот workflow (сценарий).
-- Копирование выполняй только после создания проекта: сначала `list_bill_duplication_sources` с GUID целевого проекта, затем `duplicate_bills` с точным legacy payload (старым телом запроса) `{project_guid, bill_guids}`.
-- `billGuids` в проекте связывает существующие статьи; `duplicate_bills` создаёт новые копии. Не смешивай эти действия.
+- Read current articles through `list_bills`. Create a project article through `create_bill` and edit it through `edit_bill`; company-fund articles and deletion are outside this workflow.
+- Copy only after project creation: first call `list_bill_duplication_sources` with the target project GUID, then `duplicate_bills` with the exact legacy payload `{project_guid, bill_guids}`.
+- `billGuids` links existing articles to a project, while `duplicate_bills` creates new copies. Do not mix these actions.
 
-Не создавай составной инструмент, параллельный API-контракт или дублирующий поиск. Все пять write-вызовов (операций записи) выполняются после полного preflight (проверки перед записью) одним вызовом и без собственного подтверждения; штатные OAuth scopes (права доступа), доменная валидация и центральная policy (политика) остаются обязательными.
+Do not create a composite tool, parallel API contract, or duplicate search. Each of the five write calls runs once after complete preflight and without an extra confirmation layer; normal OAuth scopes, domain validation, and central policy remain mandatory.
 
-Верни `готово`, `частично` или `заблокировано`, человеческое название проекта, выбранных заказчика и прайс-листа, изменённые статьи, API-квитанции и минимальный следующий шаг. GUID показывай только по прямому запросу.
+Return `готово`, `частично`, or `заблокировано`, the human project name, selected customer and price list, changed articles, API receipts, and the smallest next step. Show GUIDs only on explicit request.

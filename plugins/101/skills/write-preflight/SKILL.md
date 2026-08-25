@@ -25,23 +25,23 @@ completion:
     - заблокировано
 ---
 
-# Проверка перед записью
+# Write Preflight
 
-Этот helper не владеет пользовательской целью и не авторизует действие. Его результат — точный payload существующего MCP/API-инструмента либо конкретный блокер.
+This helper neither owns the user's goal nor authorizes an action. It returns either the exact payload for an existing MCP/API tool or a concrete blocker.
 
-## Вход
+## Input
 
-Получи от главного скилла явное намерение пользователя, имя write-инструмента, выбранные сущности, базовый снимок изменяемых данных и предполагаемые поля.
+Receive the explicit user intent, write-tool name, selected entities, baseline snapshot of mutable data, and proposed fields from the primary skill.
 
-## Проверка
+## Checks
 
-1. Возьми свежую machine schema выбранного инструмента и используй её исходные имена полей, типы и обязательность. Не создавай MCP-only формат.
-2. Проверь, что пользователь явно приказал выполнить эту запись. Read-only рекомендация не является разрешением.
-3. Через `entity-resolution` проверь обязательные ссылки и их доступность в текущей компании.
-4. Перечитай только затрагиваемое изменяемое состояние и актуальные права непосредственно перед вызовом.
-5. Если payload построен на полном списке, сравни свежий снимок с базовым. При конфликте ничего не перезаписывай.
-6. Примени центральную MCP policy подтверждений и риска. Не добавляй собственное подтверждение и не ослабляй штатное.
+1. Read the selected tool's fresh machine schema and preserve its original field names, types, and requirements. Do not create an MCP-only format.
+2. Verify that the user explicitly instructed this write. A read-only recommendation is not authorization.
+3. Use `entity-resolution` to verify required references and their accessibility in the current company.
+4. Reread only the affected mutable state and current permissions immediately before the call.
+5. For a full-list payload, compare the fresh snapshot with the baseline. Write nothing on conflict.
+6. Apply the central MCP confirmation and risk policy. Do not add a separate confirmation layer or weaken the standard one.
 
-## Выход
+## Output
 
-При успехе верни главному скиллу имя инструмента, точный payload, прочитанные свежие значения и основание готовности. При любой недостающей или неоднозначной обязательной части верни `заблокировано`, точную причину и минимальный следующий шаг. Не подставляй значения ради прохождения API.
+On success, return the tool name, exact payload, fresh values read, and readiness basis to the primary skill. For any missing or ambiguous required part, return `заблокировано`, the exact reason, and the smallest next step. Never substitute values merely to pass API validation.

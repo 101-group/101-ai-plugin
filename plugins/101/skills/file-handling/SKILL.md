@@ -25,13 +25,13 @@ completion:
     - заблокировано
 ---
 
-# Загрузка файлов
+# File Uploads
 
-Этот helper не владеет пользовательской целью. Он принимает от главного скилла файлы и назначение, проводит `write-preflight`, вызывает `upload_files` и возвращает результат API без параллельного формата.
+This helper does not own the user's goal. It receives files and their purpose from the primary skill, runs `write-preflight`, calls `upload_files`, and returns the API result without a parallel format.
 
-1. Проверь, что вход содержит поддерживаемые текущим инструментом файлы и все обязательные метаданные.
-2. Не восстанавливай тип, размер, URL или идентификатор догадкой: используй значения результата API.
-3. Нормализуй успешные элементы и ошибки так, чтобы вызывающий скилл мог разместить каждый подтверждённо загруженный файл и показать частичный результат.
-4. При неопределённом исходе не повторяй загрузку автоматически без доказательства отсутствия результата.
+1. Verify that the input contains files supported by the current tool and every required metadata field.
+2. Never infer type, size, URL, or identifier; use only API result values.
+3. Normalize successful items and errors so the caller can place every proven upload and report a partial result.
+4. When the outcome is uncertain, do not retry automatically without proof that no upload was created.
 
-Физическое удаление файла из хранилища не поддерживается и не имитируется. Удаление файла со страницы Wiki выполняет `wiki-management` удалением соответствующего блока, а не этим helper.
+Physical deletion from storage is unsupported and must not be simulated. Removing a file from a Wiki page belongs to `wiki-management`, which removes the relevant block rather than using this helper.

@@ -12,6 +12,48 @@
         "type": "markdown",
         "layout": "full",
         "body": "## Limitation\n\nThe calculation includes only available confirmed events."
+      },
+      {
+        "id": "profit_chart_block",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "profit_by_month"
+      },
+      {
+        "id": "profit_chart_guidance",
+        "type": "markdown",
+        "layout": "full",
+        "body": "### Chart-specific finding\n\nThe chart shows confirmed profit of 100 for August 2026 and no second period from which to infer a trend.\n\n### Chart-specific recommendation\n\nAdd at least one comparable complete period before treating the August value as a trend signal."
+      },
+      {
+        "id": "overall_audit_conclusion",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Overall audit conclusion\n\nThe available confirmed records are insufficient for a complete financial conclusion."
+      },
+      {
+        "id": "general_recommendations",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## General recommendations\n\nConfirm or resolve the missing events, repeat the audit, and deepen the analysis by project and counterparty if the complete result still shows risk."
+      }
+    ],
+    "charts": [
+      {
+        "id": "profit_by_month",
+        "title": "Confirmed profit by month",
+        "type": "bar",
+        "dataset": "events",
+        "encodings": {
+          "x": {
+            "field": "month",
+            "type": "temporal"
+          },
+          "y": {
+            "field": "profit",
+            "type": "quantitative"
+          }
+        }
       }
     ],
     "sources": [

@@ -234,6 +234,33 @@ class AnalyticsArtifactContractTest(unittest.TestCase):
 
         validate_artifact_example(payload)
 
+    def test_audit_example_keeps_chart_local_and_overall_guidance(self):
+        payload = read_json(ARTIFACT_EXAMPLE)
+        blocks = payload['manifest']['blocks']
+        chart_indexes = [
+            index for index, block in enumerate(blocks) if block['type'] == 'chart'
+        ]
+
+        self.assertTrue(chart_indexes)
+        for index in chart_indexes:
+            self.assertEqual(blocks[index + 1]['type'], 'markdown')
+            local_body = blocks[index + 1]['body'].lower()
+            self.assertIn('chart-specific finding', local_body)
+            self.assertIn('chart-specific recommendation', local_body)
+            self.assertNotIn('pending', local_body)
+
+        final_bodies = [
+            block['body'].lower()
+            for block in blocks[chart_indexes[-1] + 2 :]
+            if block['type'] == 'markdown'
+        ]
+        self.assertTrue(
+            any('overall audit conclusion' in body for body in final_bodies)
+        )
+        self.assertTrue(
+            any('general recommendations' in body for body in final_bodies)
+        )
+
     def test_manifest_scope_is_rejected_with_the_production_error_path(self):
         payload = read_json(ARTIFACT_EXAMPLE)
         payload = copy.deepcopy(payload)
@@ -320,10 +347,10 @@ class PresentationRoutingContractTest(unittest.TestCase):
         contract = read_json(ROUTING_CONTRACT)
         self.routes = {route['id']: route for route in contract['routes']}
 
-    def test_russian_project_list_mounts_the_existing_projects_widget(self):
+    def test_project_list_mounts_the_existing_projects_widget(self):
         route = self.routes['project_list']
 
-        self.assertIn('выведи список проектов', route['examples'])
+        self.assertIn('show the project list', route['examples'])
         self.assertEqual(route['tools'], ['list_projects', 'show_result'])
         self.assertEqual(route['widget']['kind'], 'projects')
         self.assertEqual(route['widget']['resourceUri'], 'ui://101/widget/app-2.0.7.html')
@@ -380,10 +407,10 @@ class PresentationRoutingContractTest(unittest.TestCase):
         self.assertIn('clickable Markdown link', index)
         self.assertIn('Do not retry the original billed MCP call', index)
 
-    def test_russian_event_list_mounts_the_existing_events_widget(self):
+    def test_event_list_mounts_the_existing_events_widget(self):
         route = self.routes['event_list']
 
-        self.assertIn('выведи список событий', route['examples'])
+        self.assertIn('show the event list', route['examples'])
         self.assertEqual(route['tools'], ['list_events', 'show_result'])
         self.assertEqual(route['widget']['kind'], 'events')
         self.assertEqual(route['widget']['resourceUri'], 'ui://101/widget/app-2.0.7.html')
@@ -391,7 +418,7 @@ class PresentationRoutingContractTest(unittest.TestCase):
     def test_task_detail_routes_to_the_shared_application_widget(self):
         route = self.routes['task_detail']
 
-        self.assertIn('открой задачу', route['examples'])
+        self.assertIn('open the task', route['examples'])
         self.assertEqual(route['tools'], ['get_task', 'show_result'])
         self.assertEqual(route['widget']['kind'], 'task_detail')
         self.assertEqual(
@@ -420,6 +447,87 @@ class PresentationRoutingContractTest(unittest.TestCase):
 
 
 class ProductionMcpSkillSyncTest(unittest.TestCase):
+    def test_import_dispatcher_and_audit_contract_are_published(self):
+        import_skill = (SKILLS / 'data-import/SKILL.md').read_text(encoding='utf-8')
+        import_rules = (
+            SKILLS / 'shared-resources/data-import-rules.md'
+        ).read_text(encoding='utf-8')
+        index = (SKILLS / '101-index/SKILL.md').read_text(encoding='utf-8')
+        analytics = (SKILLS / 'company-analytics/SKILL.md').read_text(
+            encoding='utf-8'
+        )
+        charts = (
+            SKILLS / 'analytics-visualization/SKILL.md'
+        ).read_text(encoding='utf-8')
+
+        self.assertIn('company owner', import_skill.lower())
+        self.assertIn('`is_owner=true`', import_skill.lower())
+        self.assertIn('separately installed Spreadsheets skill', import_rules)
+        self.assertIn('data-import', index)
+        self.assertIn('offer the technical integrity audit', analytics.lower())
+        self.assertIn('full company financial analysis', analytics.lower())
+        self.assertIn('professional cash flow', analytics.lower())
+        self.assertIn('technical integrity was not checked', analytics.lower())
+        for source in (analytics, charts):
+            self.assertIn('chart-specific finding', source)
+            self.assertIn('chart-specific recommendation', source)
+            self.assertIn('overall audit conclusion', source)
+            self.assertIn('general recommendations', source)
+
+    def test_all_published_skill_files_use_english_prose_except_product_literals(self):
+        cyrillic = re.compile(r'[А-Яа-яЁё]')
+        allowed_literals = {
+            'Агентское вознаграждение',
+            'Из проекта в фонд компании',
+            'Из фонда компании в проект',
+            'Оплата или аванс в Фонде компании',
+            'Оплата или аванс по проекту',
+            'Отчёт',
+            'Отчёт по проекту',
+            'Отчёт фонда компании',
+            'Перевод из Фонда компании в проект',
+            'Перевод из проекта в Фонд компании',
+            'Перевод подотчетных средств в Фонде компании',
+            'Перевод подотчетных средств по проекту',
+            'Подотчётные средства проекта',
+            'Подотчётные средства фонда компании',
+            'Поступление в фонд компании',
+            'Поступление по проекту',
+            'Смета',
+            'Смета по проекту',
+            'Смета фонда компании',
+            'Собственные средства проекта',
+            'Собственные средства фонда компании',
+            'готово',
+            'заблокировано',
+            'частично',
+        }
+        published_files = sorted(
+            path
+            for suffix in ('*.md', '*.json', '*.yaml')
+            for path in SKILLS.rglob(suffix)
+        )
+        offenders = []
+
+        for path in published_files:
+            for line_number, line in enumerate(
+                path.read_text(encoding='utf-8').splitlines(),
+                start=1,
+            ):
+                without_literals = line
+                for literal in allowed_literals:
+                    without_literals = without_literals.replace(f'`{literal}`', '')
+                if without_literals.strip() in {
+                    '- готово',
+                    '- частично',
+                    '- заблокировано',
+                }:
+                    continue
+                if cyrillic.search(without_literals):
+                    offenders.append(f'{path.relative_to(SKILLS)}:{line_number}')
+
+        self.assertEqual(offenders, [])
+
     def test_financial_audit_active_bodies_and_resources_are_english(self):
         cyrillic = re.compile(r'[А-Яа-яЁё]')
 
