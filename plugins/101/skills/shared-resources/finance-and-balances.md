@@ -1,9 +1,13 @@
-# Финансы и балансы
+# Finance and Balances
 
-- Финансовые выводы и суммы строятся по подтверждённым событиям. Неподтверждённые события показывай отдельно как фактор, способный изменить картину.
-- Разделяй деньги проекта, собственный баланс участника, подотчётный баланс, расчёты с контрагентом и фонд компании.
-- Положительный или отрицательный итоговый баланс сам по себе не доказывает платёжеспособность или её отсутствие: сначала раскрой состав обязательств и доступных денег.
-- Смета является планом, отчёт — фактом расходов. Не смешивай план и факт в одной сумме без явного объяснения.
-- Цена отчёта для заказчика может быть 0 при ненулевой сумме подрядчика: это расход не за счёт заказчика и убыток проекта; распределение делит этот убыток между участниками как прибыль, но с обратным знаком.
-- Read-only рекомендация не разрешает перевод, отчёт или другое изменение. Запись начинается только после явной команды пользователя.
-- После финансовой записи перечитай затронутый баланс через API и не выдавай рассчитанное ожидание за подтверждённый результат.
+- Build financial findings and totals from confirmed events. Show unconfirmed events separately as drafts that may change the picture.
+- Keep project cash, a member’s own balance, accountable balance, counterparty settlements, and the company fund separate.
+- When reading project members, always read `/members/` through `list_project_members` and `/fund-settlements/` through `get_project_fund_settlements` with the same `project_guid`. Never substitute `ownBalance` from WOHOM or any other balance for `settlementBalance`. Successful zero values mean a zero settlement, not proven absence of fund participation. If the fund read fails, return members as a partial result and name the unavailable source.
+- `settlementBalance > 0`: the project owes the company fund. `settlementBalance < 0`: the company fund owes the project. `settlementBalance = 0`: the settlement is closed.
+- A positive or negative closing balance does not by itself prove solvency or insolvency. First show confirmed obligations and available cash.
+- An estimate is a plan; a report is an actual expense. Do not mix them in one total without an explicit explanation.
+- A confirmed report may have a customer price of 0 and a non-zero contractor amount. That produces zero revenue, a direct cost, and a project loss; the distribution allocates the loss with the opposite sign.
+- A direct Company Fund Inflow is external financing or investment for company expenses, never revenue or profit.
+- Project ↔ fund transfers are internal movements and do not create income or expense again in a consolidated view.
+- A read-only recommendation does not authorize a transfer, report, permission change, or any other mutation. A write starts only after an explicit user instruction and a permissions check.
+- After a financial write, reread the affected balance through the API. Never present a calculated expectation as a verified result.

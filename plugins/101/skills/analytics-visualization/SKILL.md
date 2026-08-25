@@ -1,7 +1,7 @@
 ---
 name: analytics-visualization
-description: Internal helper for canonical OpenAI Data Analytics charts and composite 101 reports after analytics, comparison, trend, risk, financial-state, or audit intent.
-version: "2.0.1"
+description: Use when a primary 101 analytical workflow has approved a standalone chart or composite report from verified aggregates.
+version: "2.1.0"
 role: helper
 invocation: internal
 intents:
@@ -20,10 +20,10 @@ resources:
     kind: token-snapshot
     required: true
   - path: references/chart-payload-example.json
-    kind: contract-example
+    kind: payload-example
     required: true
   - path: references/artifact-payload-example.json
-    kind: contract-example
+    kind: payload-example
     required: true
 completion:
   statuses:
@@ -32,17 +32,15 @@ completion:
     - заблокировано
 ---
 
-# OpenAI Data Analytics в 101
+# OpenAI Data Analytics in 101
 
-Этот helper (помощник) вызывается после положительного аналитического или визуального намерения, уже определённого главным workflow (сценарием). Сам не запрашивает бизнес-данные, не исследует источники и не превращает одиночное скалярное чтение в график.
+This helper runs only after the primary workflow has allowed visualization through explicit intent or the default analytical rule. It never fetches business data, explores sources, or turns plain data into a chart by itself.
 
-1. Прочитай `references/chart-design.md`, token snapshot (снимок токенов) и оба канонических JSON-примера перед сборкой графика или составного отчёта.
-2. Сформулируй аналитический вопрос и выбери простейший из 18 canonical типов: `line`, `area`, `stackedArea`, `bar`, `horizontalBar`, `stackedBar`, `stackedBar100`, `horizontalStackedBar`, `horizontalStackedBar100`, `histogram`, `scatter`, `heatmap`, `pie`, `leaderboard`, `sparkline`, `funnel`, `waterfall`, `boxPlot`.
-3. Проверь единицы, знак, зерно, период, bounded table/snapshot (ограниченную таблицу/снимок) и честный 101 `source`: `engine=101-mcp`, `language=mcp`, строгий `executedAt`, фактический `tool`, безопасные filters/metrics без GUID, URL, SQL и credentials (секретов). Каждый `source.filters` value (значение фильтра) — только непустой string, number или boolean; массивы, объекты и null запрещены. Если фактический MCP-аргумент был массивом, сериализуй его для provenance (описания источника) в одну короткую строку через запятую, как `status: "partner_verified,client_accepted"` в точном примере.
-4. Для одного графика вызывай `render_chart({title, source, table, chart, display})`: все пять полей находятся на верхнем уровне аргументов. Не оборачивай всю модель в дополнительный `payload` или `data`. `table.columns` объявляет все поля, каждая row (строка) содержит ровно их. Каждый `chart.fields.x/y/color/size/label/facet/lineStyle` — объект вида `{"field":"month","type":"temporal"}`, а не строка; `field` ссылается только на объявленную колонку.
-5. Для аудита или многокомпонентного анализа копируй структуру точного JSON-примера, а не достраивай её по памяти: верхний уровень содержит только `surface`, `manifest`, `snapshot`. `manifest` обязательно содержит только `version`, `surface`, `title`, `generatedAt`, `blocks`, `sources` и при необходимости `description`, `filters`, `cards`, `charts`, `tables`. `snapshot` обязательно содержит только `version`, `generatedAt`, `status`, `datasets` и при необходимости `accessIssues`. Никогда не добавляй `manifest.scope`, `snapshot.scope`, произвольные metadata (метаданные) или поля из старых chart-примеров. Собери текст, `metric-strip`, ровно три `chart` и `table`; `snapshot.status` использует только `ready|partial|blocked|fixture`.
-6. Соблюдай вложенные ссылки примера: `blocks[].chartId/tableId/cardIds` указывают только на объявленные assets (элементы отчёта), chart encoding (привязка графика) — только на поля своего dataset (набора данных), `tables[].columns[].field` — только на поля строк своего dataset. Если используешь `tables[].defaultSort`, он содержит ровно `field` и `direction`; `field` обязан дословно совпадать с одним `tables[].columns[].field`, а `direction` — только `asc|desc`. Для стандартного аудита не добавляй структурные ключи, которых нет в точном примере.
-7. Сначала вызови `validate_artifact({surface, manifest, snapshot})`. При успехе передай ровно тот же объект без добавления, удаления или переименования полей в один `render_artifact({surface, manifest, snapshot})`.
-8. После успеха не повторяй presentation call. При `failed`, `INVALID_ARGUMENT` или `invalid_analytics_payload` остановись и честно верни ошибку без повторного вызова. При ошибке источника не выдумывай rows; для `partial`/`blocked` добавь объект `accessIssues[]` с обязательными `id` в `lower_snake_case` и понятным `message`.
+1. Read `references/chart-design.md`, the token snapshot, and both canonical payload examples in `references/`.
+2. State the analytical question and select the simplest of the 18 canonical types: `line`, `area`, `stackedArea`, `bar`, `horizontalBar`, `stackedBar`, `stackedBar100`, `horizontalStackedBar`, `horizontalStackedBar100`, `histogram`, `scatter`, `heatmap`, `pie`, `leaderboard`, `sparkline`, `funnel`, `waterfall`, `boxPlot`.
+3. Verify sign, grain, period, bounded table or snapshot, and a truthful 101 `source`: `engine=101-mcp`, `language=mcp`, strict `executedAt`, the actual `tool`, and safe filters or metrics without GUIDs, URLs, SQL, or credentials. Only `references/chart-design.md` owns chart and artifact semantics, including raw numeric payloads.
+4. For one chart, call `render_chart({title, source, table, chart, display})`; all five fields are top-level arguments. Do not wrap the model in an extra `payload` or `data` field. `table.columns` declares every field and each row contains exactly those fields. Every `chart.fields.x/y/color/size/label/facet/lineStyle` value is an encoding object such as `{"field":"month","type":"temporal"}`, never a string, and references a declared column.
+5. For an audit, build one composite artifact whose `manifest.blocks` contains text, useful metrics, an adaptive number of justified charts, and tables as needed. `snapshot.status` uses only `ready|partial|blocked|fixture`. Call exactly one `validate_artifact` as `validate_artifact({surface, manifest, snapshot})`, then on success pass the unchanged payload to exactly one `render_artifact` as `render_artifact({surface, manifest, snapshot})`.
+6. After success, do not repeat a presentation call. On `failed`, `INVALID_ARGUMENT`, or `invalid_analytics_payload`, stop and return the error honestly without retrying. On source failure, invent no rows; for `partial` or `blocked`, add visible `accessIssues[]` entries with required `lower_snake_case` IDs and understandable messages.
 
-Виджет обязан сохранять hover/focus tooltip (подсказку мышью и клавиатурой), legend toggle (переключатель рядов), доступную таблицу, mobile layout (мобильную раскладку) и явные empty/sparse/error states (пустое/разреженное/ошибочное состояния). Не заявляй об отрисовке, если вызов не был успешным.
+The widget must preserve hover and keyboard-focus tooltips, legend toggles, an accessible table, mobile layout, and explicit empty, sparse, and error states. Never claim rendering succeeded when the call failed.

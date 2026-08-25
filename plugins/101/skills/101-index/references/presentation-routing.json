@@ -28,9 +28,9 @@
       ],
       "artifact": {
         "text": true,
-        "kpi": true,
-        "charts": 3,
-        "table": true
+        "kpi": "as_needed",
+        "charts": "adaptive",
+        "tables": "as_needed"
       },
       "widget": {
         "kind": "analytics_artifact",

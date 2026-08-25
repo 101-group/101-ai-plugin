@@ -1,8 +1,8 @@
-# Контекст и разрешение сущностей
+# Context and Entity Resolution
 
-- Начинай с `whoami`: текущий пользователь и доступная ему компания задают границу данных.
-- В одном чате сохраняй выбранные компанию, проект и сущности, пока пользователь явно не сменил цель.
-- Не показывай GUID в обычном ответе. Храни его только как техническую ссылку для вызова инструмента и evidence ledger.
-- Единственное точное доступное совпадение можно выбрать автоматически. Несколько совпадений требуют человеческого выбора по названию и контексту.
-- Не угадывай компанию, проект, участника, событие или Wiki по похожему названию.
-- Перед записью повторно проверь существование и доступность затрагиваемых сущностей через актуальный API.
+- Start with `whoami`: the current user and their available company define the data boundary.
+- Keep the selected company, project, and entities within one conversation until the user explicitly changes the goal.
+- Do not show GUIDs in an ordinary response. Keep them only as technical references for tool calls and the evidence ledger.
+- One exact available match may be selected automatically. Multiple matches require a human choice based on name and meaningful context.
+- Never guess a company, project, member, event, or Wiki from a similar name.
+- Before a write, recheck the existence and accessibility of every affected entity through the current API.
