@@ -64,7 +64,7 @@ class PluginManifestTest(unittest.TestCase):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
 
         self.assertEqual(manifest['name'], '101')
-        self.assertEqual(manifest['version'], '2.2.0')
+        self.assertEqual(manifest['version'], '2.2.1')
         self.assertEqual(manifest['mcpServers'], './.mcp.json')
         self.assertEqual(manifest['apps'], './.app.json')
         self.assertEqual(manifest['interface']['displayName'], '101')
@@ -79,8 +79,8 @@ class PluginManifestTest(unittest.TestCase):
         manifest = read_json('plugins/101/.codex-plugin/plugin.json')
         readme = (ROOT / 'README.md').read_text(encoding='utf-8')
 
-        self.assertEqual(manifest['version'], '2.2.0')
-        self.assertIn('Текущая версия плагина для Codex: `2.2.0`.', readme)
+        self.assertEqual(manifest['version'], '2.2.1')
+        self.assertIn('Текущая версия плагина для Codex: `2.2.1`.', readme)
 
     def test_task_management_skill_is_bundled_for_the_public_plugin(self):
         skill = ROOT / 'plugins/101/skills/task-management/SKILL.md'
@@ -95,6 +95,31 @@ class PluginManifestTest(unittest.TestCase):
         self.assertIn('ui://101/widget/app-2.0.7.html', source)
         self.assertIn('set_task_assignee', source)
         self.assertIn('submit_task_comment', source)
+
+    def test_file_handling_declares_both_upload_transports(self):
+        skill = ROOT / 'plugins/101/skills/file-handling/SKILL.md'
+        source = skill.read_text(encoding='utf-8')
+        frontmatter = source.split('---', 2)[1]
+        required_tools = frontmatter.split('required_tools:', 1)[1].split(
+            'optional_tools:', 1
+        )[0]
+
+        self.assertEqual(
+            {
+                line.removeprefix('  - ').strip()
+                for line in required_tools.splitlines()
+                if line.strip()
+            },
+            {'upload_files', 'upload_image_content'},
+        )
+        for routing_invariant in (
+            'temporary HTTPS',
+            'absolute local path',
+            'base64 without a data URL',
+            'Never send the local path to the 101 server',
+            '18 MiB',
+        ):
+            self.assertIn(routing_invariant, source)
 
     def test_bundled_analytics_runtime_matches_its_immutable_release_lock(self):
         widget_root = ROOT / 'plugins/101/widgets/analytics/v2'
