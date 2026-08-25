@@ -76,7 +76,7 @@ Work read-only against the known 101 contract. Do not rediscover the database or
 
 Before a full company financial analysis, briefly explain the value of structural and arithmetic validation and offer the technical integrity audit. This includes a general audit, a full management overview, and professional cash flow, P&L/income statement, EBITDA, or management balance work. Do not start technical reads before the user agrees. Do not make this offer before a narrow request about one project, counterparty, expense class, or metric.
 
-If the user agrees, read `technical-integrity-audit.md`, fully read all event pages plus every necessary event detail, and apply its blocking rules. If a page, detail, structural link, distribution, or arithmetic check fails, stop the general financial analysis and return the issues and recommendations without changing data.
+If the user agrees, read `technical-integrity-audit.md`, fully read all event pages plus every necessary event detail, and apply its blocking rules. If a page, detail, structural link, distribution, or arithmetic check fails, stop the full financial analysis and return the issues and recommendations without changing data.
 
 If the user declines, continue the financial analysis immediately from the available data. State in the result that technical integrity was not checked, so the conclusions may inherit errors in the underlying records.
 

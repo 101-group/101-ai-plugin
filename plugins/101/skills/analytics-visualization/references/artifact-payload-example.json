@@ -23,7 +23,7 @@
         "id": "profit_chart_guidance",
         "type": "markdown",
         "layout": "full",
-        "body": "### Chart-specific finding\n\nAvailable confirmed events show profit of 100 in August 2026, but the incomplete event set limits confidence.\n\n### Chart-specific recommendation\n\nResolve the pending project events, then rerun this monthly profit view before making a profit decision."
+        "body": "### Chart-specific finding\n\nThe chart shows confirmed profit of 100 for August 2026 and no second period from which to infer a trend.\n\n### Chart-specific recommendation\n\nAdd at least one comparable complete period before treating the August value as a trend signal."
       },
       {
         "id": "overall_audit_conclusion",

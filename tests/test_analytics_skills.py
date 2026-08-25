@@ -247,6 +247,7 @@ class AnalyticsArtifactContractTest(unittest.TestCase):
             local_body = blocks[index + 1]['body'].lower()
             self.assertIn('chart-specific finding', local_body)
             self.assertIn('chart-specific recommendation', local_body)
+            self.assertNotIn('pending', local_body)
 
         final_bodies = [
             block['body'].lower()
