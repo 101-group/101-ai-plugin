@@ -64,7 +64,7 @@ A read-only recommendation is not write authorization. Start creation only after
 
 For multiple linked transfers, first show a clear plan: recipient, project, amounts, balances closed, and deficit consequence. After successful `write-preflight`, make sequential individual API calls. Use only central MCP confirmation policy; do not add another layer or bypass the standard flow.
 
-When the user explicitly requests the complete linked transfer and every required field is known, proceed after fresh `write-preflight` under the central MCP policy without a second chat confirmation.
+When the user explicitly requests the complete linked pair and every required field is known, proceed after fresh `write-preflight` under the central MCP policy without a second chat confirmation.
 
 Preserve the API receipt after every creation and reread balances after a series. On an error or uncertain outcome, do not claim creation and do not retry automatically.
 

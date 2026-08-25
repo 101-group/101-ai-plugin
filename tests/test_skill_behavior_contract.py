@@ -188,6 +188,12 @@ class SkillBehaviorContractTest(unittest.TestCase):
             settlements_skill,
         )
         self.assertIn(
+            'When the user explicitly requests the complete linked pair and every '
+            'required field is known, proceed after fresh `write-preflight` under '
+            'the central MCP policy without a second chat confirmation.',
+            settlements_skill,
+        )
+        self.assertIn(
             'Apply the central MCP confirmation and risk policy. Do not add a separate '
             'confirmation layer or weaken the standard one.',
             preflight_skill,
