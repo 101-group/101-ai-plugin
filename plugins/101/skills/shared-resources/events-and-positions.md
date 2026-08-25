@@ -24,7 +24,15 @@
 - `Отчёт` uses the existing expense contract, and `Смета` uses the existing estimate contract. Do not create an MCP-only event type.
 - The customer price of an expense report may be zero while the contractor amount is nonzero. This is an expense not charged to the customer and therefore a project loss; allocation distributes that loss among participants as profit with the opposite sign.
 - A position may come from a price list, an existing estimate, or manual input. Preserve its source through the current API contract.
-- Send `startDate` and `endDate` only from explicit user data or an existing event. When the API permits `null`, do not inherit event dates or invent a schedule.
+- Take `startDate` and `endDate` only from explicit user data or an existing position. When the API permits `null`, do not inherit dates from the event, project, neighboring row, or current day.
 - For a targeted edit, first read the complete fresh list, change only the target position, and send the full resulting list required by the API contract.
 - If the collection or affected positions changed after the baseline read, stop the write and show the conflict without automatic merging.
 - Create multiple events as sequential single-event create calls. There is no batch payload.
+- Build the complete queue before starting writes and validate required fields, entities, machine schema, positions, and every exact create payload.
+- If a known issue exists anywhere in the queue, create nothing yet. Return every correction needed in one message, then rebuild and recheck the queue.
+- After the queue validates, briefly state the planned sequence and proceed under the central MCP confirmation policy only.
+- Immediately before each item, rerun a fresh `write-preflight` and make exactly one create call.
+- A local data error blocks only that item. Continue later independent items only when their prerequisites still hold after rereading fresh state.
+- A system error, lost permission, contract change, or uncertain write outcome stops the remaining tail.
+- Preserve an API receipt for every successful call.
+- On continuation, skip proven created items, recheck proven not-started items, and first compare server state for any unknown outcome. Never retry an unknown write automatically.

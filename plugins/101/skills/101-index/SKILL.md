@@ -36,7 +36,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # 101 MCP Dispatcher
@@ -70,7 +70,7 @@ Professional terms — cash flow statement, P&L/income statement, EBITDA, or man
 4. Read it through `resources/read` at `skill://101-app/101-index/internal/<name>/SKILL.md`.
 5. If the goal is clear, continue without an unnecessary question. Ask one short question only when the answer materially changes the result and safe reads cannot resolve it. A safe read never authorizes a write.
 
-Use `company-analytics` for a general company audit, professional statements, or any analytics that should include visualization. Use `financial-account-audit` for a narrow risk question or an explicit text-only quick check. Offer the optional technical integrity check before any full company financial analysis, including professional statements, never before a narrow request.
+Use `company-analytics` for a general company audit, professional statements, or any analytics that should include visualization. Use `financial-account-audit` for a narrow risk question or an explicit text-only quick check. `company-analytics` runs the technical integrity audit immediately before a full company financial analysis, including professional statements, and does not add the audit to a narrow request.
 
 Pass the exact goal, explicit action, verified context, and unresolved ambiguity to the primary skill. Do not assemble a write payload on behalf of a domain skill.
 

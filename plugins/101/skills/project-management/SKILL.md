@@ -37,7 +37,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # Project Management
@@ -58,4 +58,4 @@ Run as the primary internal skill selected by `101-index`. Create and edit proje
 
 Do not create a composite tool, parallel API contract, or duplicate search. Each of the five write calls runs once after complete preflight and without an extra confirmation layer; normal OAuth scopes, domain validation, and central policy remain mandatory.
 
-Return `готово`, `частично`, or `заблокировано`, the human project name, selected customer and price list, changed articles, API receipts, and the smallest next step. Show GUIDs only on explicit request.
+Use the canonical completion contract from `safety-and-permissions.md`; return the human project name, selected customer and price list, changed articles, API receipts, and the smallest next step. Show GUIDs only on explicit request.

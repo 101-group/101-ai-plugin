@@ -33,7 +33,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # One-off Data Import to 101

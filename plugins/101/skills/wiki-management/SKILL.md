@@ -46,7 +46,7 @@ completion:
   statuses:
     - готово
     - частично
-    - заблокировано
+    - не завершено
 ---
 
 # Wiki and File Management
@@ -74,4 +74,4 @@ Physical deletion from storage is unsupported and must not be simulated. A succe
 
 ## Completion
 
-Return `готово`, `частично`, or `заблокировано`; name the Wiki and page in human terms, list verified or changed blocks, permissions, publication, and media, show the fresh result, and provide the smallest next step.
+Use the canonical completion contract from `safety-and-permissions.md`; name the Wiki and page in human terms, list verified or changed blocks, permissions, publication, and media, show the fresh result, and provide the smallest next step.
