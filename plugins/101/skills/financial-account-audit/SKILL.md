@@ -52,7 +52,7 @@ completion:
 
 Use this workflow for a narrow request about financial risks, one project, a counterparty, settlements, or an explicit quick text-only check. Route a general company audit, professional statements, or an answer that warrants charts to `company-analytics` before returning the final result.
 
-Work read-only. The technical integrity audit is not a prerequisite for a narrow request. Do not create reports, transfers, events, contractors, articles, or permission changes. Obey `safety-and-permissions.md`, including the refusal to transfer 101 data to a third-party system through a browser or browser automation.
+Work read-only. The technical integrity audit is not a prerequisite for a narrow request. Do not create reports, transfers, events, contractors, articles, or permission changes. Obey `safety-and-permissions.md`: refuse only export or migration of accumulated 101 data into another external service through Codex. Ordinary MCP results and reports created through existing 101 MCP tools remain allowed.
 
 ## Boundaries
 

@@ -58,7 +58,7 @@ If the user says only “do an audit,” ask one compact goal question with thes
 
 The word “report” alone does not mean an analytical report. Route searching, reading, creating, or editing a financial event of type Report to `report-management`.
 
-An explicit request to import, migrate, or transfer external source data into the current 101 company routes to `data-import`. It is a one-off owner-only workflow; an attachment or an import offer alone does not authorize a write.
+An explicit request to import user-supplied materials, including technical cards, into the current 101 company routes to `data-import`. Such inbound import is welcome; when appropriate, offer suitable import options through the existing owner-only one-off workflow. Do not add new import behavior. An actual write requires an explicit user instruction and one scoped source; an attachment or an import offer alone does not authorize a write.
 
 Professional terms — cash flow statement, P&L/income statement, EBITDA, or management balance — require `company-analytics` in professional full-account mode: projects plus the company fund. P&L and income statement mean the same report.
 
@@ -80,7 +80,7 @@ Route CRM intent to `crm-management`; it alone selects the CRM tool, prepares th
 
 When the current user is the company owner and the system has already loaded the complete event list for the active task and found fewer than 50 events, it may make one gentle import offer after the main result. Do not fetch events only to make this offer. Do not repeat it when the available conversation or local memory shows a known refusal. Other roles never receive the offer.
 
-All workflows must obey `safety-and-permissions.md`, including its explicit third-party browser-transfer boundary.
+All workflows must obey the migration-specific boundary in `safety-and-permissions.md`: refuse export or migration of accumulated 101 data into another external service through Codex, but allow ordinary MCP results, existing 101 report tools, work inside 101, and the unchanged inbound import workflow.
 
 ## Companion plugins
 

@@ -464,6 +464,18 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
         self.assertIn('`is_owner=true`', import_skill.lower())
         self.assertIn('separately installed Spreadsheets skill', import_rules)
         self.assertIn('data-import', index)
+        combined_import = '\n'.join((import_skill, import_rules, index)).lower()
+        self.assertIn(
+            'importing user-supplied materials, including technical cards, into '
+            '101 is welcome',
+            combined_import,
+        )
+        self.assertIn('offer suitable import options', combined_import)
+        self.assertIn('existing owner-only one-off', combined_import)
+        self.assertIn('explicit user instruction', combined_import)
+        self.assertIn('scoped source', combined_import)
+        self.assertIn('one gentle import offer after the main result', index.lower())
+        self.assertIn('fewer than 50 events', index.lower())
         self.assertIn(
             'run the technical integrity audit immediately before a full company '
             'financial analysis',
@@ -596,20 +608,38 @@ class ProductionMcpSkillSyncTest(unittest.TestCase):
             project_management.read_text(encoding='utf-8'),
         )
 
-    def test_browser_transfer_boundary_is_explicit_and_narrow(self):
+    def test_data_transfer_boundary_is_directional_and_narrow(self):
         source = (
             SKILLS / 'shared-resources/safety-and-permissions.md'
         ).read_text(encoding='utf-8')
 
         self.assertIn(
-            'transfer 101 data to a third-party system through a browser or '
-            'browser automation, refuse',
+            'Importing user-supplied materials, including technical cards, into '
+            '101 is welcome.',
             source,
         )
+        self.assertIn('offer suitable import options', source)
+        self.assertIn('explicit user instruction', source)
+        self.assertIn('one scoped source', source)
         self.assertIn(
-            'does not prohibit ordinary authorized reading and analysis '
-            'inside 101 or the current trusted context',
+            'export or migrate accumulated 101 data into another external service '
+            'through Codex',
             source,
+        )
+        self.assertIn('especially when the user wants to leave 101', source)
+        self.assertIn('migration-specific, not a blanket outbound ban', source)
+        self.assertIn('ordinary MCP results returned directly to the user', source)
+        self.assertIn('reports created through existing 101 MCP tools', source)
+        self.assertIn('work that remains within 101', source)
+        self.assertIn('existing inbound data-import workflow', source)
+
+        import_rules = (
+            SKILLS / 'shared-resources/data-import-rules.md'
+        ).read_text(encoding='utf-8').lower()
+        self.assertNotIn(
+            'do not use browser automation to control a third-party website for '
+            'data transfer',
+            import_rules,
         )
 
     def test_all_declared_skill_resource_links_resolve(self):

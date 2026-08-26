@@ -59,7 +59,7 @@ completion:
 
 # 101 Company Analytics and Audits
 
-Work read-only against the known 101 contract. Do not rediscover the database or schema, create a parallel metric layer, run an external compute environment, or export raw events when an available aggregate answers the question. Obey `safety-and-permissions.md`; in particular, refuse any request to transfer 101 data to a third-party system through browser automation.
+Work read-only against the known 101 contract. Do not rediscover the database or schema, create a parallel metric layer, run an external compute environment, or export raw events when an available aggregate answers the question. Obey `safety-and-permissions.md`: refuse only export or migration of accumulated 101 data into another external service through Codex. Ordinary MCP results and reports created through existing 101 MCP tools remain allowed.
 
 ## Goal and mode gate
 

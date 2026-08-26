@@ -38,12 +38,12 @@ completion:
 
 # One-off Data Import to 101
 
-Run only as the primary skill selected by `101-index` for an explicit import request. This is a conversational one-off import into one current target company, never background synchronization. The offer does not authorize a write. Neither does an attached file or completed parsing.
+Run only as the primary skill selected by `101-index` for an explicit import request. Importing user-supplied materials, including technical cards, into 101 is welcome; when appropriate, offer suitable import options through this existing owner-only one-off workflow. This remains a conversational one-off import into one current target company, never background synchronization. Do not add new import behavior. An actual write still requires an explicit user instruction and one scoped source. The offer does not authorize a write. Neither does an attached file or completed parsing.
 
 ## Eligibility and source
 
 1. Call `whoami`, pin exactly one current company, and require its returned `is_owner=true`. The user-facing role is **company owner**; do not substitute another role label. Other roles are blocked from every import, including project-only imports, even if an individual write tool would otherwise allow them.
-2. Read `data-import-rules.md` before parsing or planning. Select the most direct permitted source: a chat attachment, connected application, official export, or authorized API. Never transfer data by controlling a third-party website through browser automation.
+2. Read `data-import-rules.md` before parsing or planning. Select the most direct permitted source: a chat attachment, connected application, official export, or authorized API. Never use this workflow to export or migrate accumulated 101 data into another external service through Codex.
 3. A simple CSV may be parsed directly. A complex spreadsheet requires the separately installed Spreadsheets skill for reading and normalization. Do not copy Spreadsheets instructions or assets into 101. If it is unavailable, ask the user to install it and preserve the import state already established.
 
 ## Classify and route
