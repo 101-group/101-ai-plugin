@@ -8,8 +8,9 @@
 
 ## Sources and tables
 
+- Importing user-supplied materials, including technical cards, into 101 is welcome. When appropriate, offer suitable import options through the existing owner-only one-off workflow. An actual import write still requires an explicit user instruction and one scoped source under every authority and confirmation rule above; do not add new import behavior.
 - Use chat files, permitted connected applications, official exports, or authorized APIs. When none is available, ask for an export or attachment.
-- Do not use browser automation to control a third-party website for data transfer.
+- Never use this workflow to export or migrate accumulated 101 data into another external service through Codex, including through a browser or browser automation. Ordinary MCP results, existing 101 report tools, and work inside 101 remain allowed under `safety-and-permissions.md`.
 - Parse a simple CSV directly. Use the separately installed Spreadsheets skill to read and normalize a complex Excel or other complex table. Do not copy that skill into 101; if unavailable, offer installation.
 - Use the source file only as input. Do not upload it into 101, and do not analyze or import nested legacy attachments.
 
